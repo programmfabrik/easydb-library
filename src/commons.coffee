@@ -195,7 +195,4 @@ class CustomDataTypeWithCommons extends CustomDataType
             conceptURI : ''
         }
       return "empty"
-  #######################################################################
-  # render Options for Datamodel as empty
-  renderCustomDataOptionsInDatamodel: (custom_settings) ->
-    new Label(text: "Keine Optionen möglich")
+    
