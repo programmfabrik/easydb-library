@@ -1,0 +1,238 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:         easy5-instance
+# Required-Start:   $local_fs $network $time postgresql mountnfs elasticsearch
+# Required-Stop:    $local_fs $network $time postgresql mountnfs elasticsearch
+# Should-Start:     $syslog
+# Should-Stop:      $syslog
+# Default-Start:    2 3 4 5
+# Default-Stop:     0 1 6
+# Short-Description:    easydb5 instance
+### END INIT INFO
+
+
+# purpose of this script:
+#   * Start easydb5-server within a screen.
+#   * Change to unpriviledged user $RUNAS to run easydb5-server and screen as. (sudo)
+#   * Function as an init script: arguments start and stop are enough to do the right thing.
+#   * Read instance name from $0 to require only a symlink per instance. (script file name after "easy5-")
+#   * Do not let screen(and the bash in the screen) die after easydb5-server ends.
+#   * Have the starting commandline as the most recent bash-history-line.
+
+# usage:
+#       /etc/init.d/easy5-$MYNAME start
+#       /etc/init.d/easy5-$MYNAME stop
+#
+#       /etc/init.d/easy5-$MYNAME status 
+#           * show pstree of running screen/bash containing easdb5-server
+#       /etc/init.d/easy5-$MYNAME runs   
+#           * only indicate by returnvalue(exitcode) whether easydb5-server is running
+#
+#       ln -s /srv/git/checkouts/imexporter/src/tools/easy5-dev.init /etc/init.d/easy5-$INST
+#           * prepares this script for another instance $INST.
+#           * requires /srv/www/$INST/easydb-server/start.sh
+#           * $RUNAS and $STARTDIR are hardcoded, for init usage.
+#           * If you want different $RUNAS, $STARTDIR, ... then copy and change script instead.
+#
+#       DEBUG=1  /etc/init.d/easy5-$MYNAME
+#           * show debug output
+#       DEBUG="" /etc/init.d/easy5-$MYNAME
+#           * no debug output (default)
+
+
+# CONFIG ##################
+
+MYNAME=`basename $0` # /etc/init.d/easy5-instancename -> easy5-instancename
+MYNAME=${MYNAME#*-}  # easy5-instancename -> instancename
+STARTDIR=/srv/www/$MYNAME/easydb-server
+SLEEP_RESTART=1 # wait how many seconds between stop and start, when doing restart
+RUNAS=easydb
+BASHRC=/dev/null
+NAME_IN_PSTREE=es-manager
+NAME_IN_PS=easydb-server
+
+# PREPARATION ##################
+
+# log that and when this is called as root
+[ "$LOGNAME" = root ] && echo "$0 called with '$1' on `date` in runlevel `runlevel`" >> /var/log/custom-init
+
+# helper functions:
+
+debug(){ [ "$DEBUG" ] && echo "DEBUG: $@" >&2; } # output to stderr, only if $DEBUG is not empty
+
+get_screen_pid(){ # sets $SCREENPID to the PID of one screen with matching name
+    SCREENPS=`ps x|grep -i -- 'screen.*-S easy5-'$MYNAME |grep -v grep|tail -n 1`
+    set $SCREENPS ""  # strings are sorted into $1 $2 $3 ...
+    SCREENPID=$1
+    if [ "$SCREENPID" ] ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_pid_running() {
+ ps --pid="$1" &>/dev/null
+}
+
+# change user:
+
+debug "This script was called as user '$LOGNAME' to do '$1'"
+if [ "$LOGNAME" = "$RUNAS" ] ; then
+    echo -n # just fall through
+elif [ "$LOGNAME" = root ] || [ "$LOGNAME" = jenkins ] ; then
+    PTSFILE=`ls /proc/$$/fd -l --color=no|sed -n 's#.*/dev/pts#/dev/pts#p'|head -n 1`
+    if [ -e "$PTSFILE" ] ; then
+        debug "changing permissions on $PTSFILE (`ls -l $PTSFILE`)"
+        chmod a+rw "$PTSFILE"
+    else
+        #debug "no pts-file found: ls /proc/$$/fd -l --color=no : `ls /proc/$$/fd -l --color=no`"
+        debug "no pts-file found in /proc/$$/fd"
+    fi
+    debug "changing from user '$LOGNAME' to '$RUNAS'"
+    exec sudo -u $RUNAS DEBUG=$DEBUG $0 $@
+    debug "ERROR: This line should not be reached !"
+    exit 1
+else
+    echo "ERROR: LOGNAME '$LOGNAME' does neither match RUNAS '$RUNAS' nor is it 'root' or 'jenkins'. Aborting."
+    exit 1
+fi
+
+# store the bash PID into a file:
+
+eval PIDFILE=~$RUNAS/easy5-$MYNAME.bashpid
+debug "PIDFILE=$PIDFILE"
+
+
+# MAIN ##################
+
+case "$1" in
+start)
+    debug "screens before start: `screen -ls`"
+
+    echo -n "Starting $MYNAME ... " ; [ "$DEBUG" ] && echo
+
+    COUNT=0
+    while get_screen_pid; do
+        debug "screen still present. Interpreting start as restart. Killing screen $SCREENPID"
+        kill $SCREENPID
+        COUNT=$((COUNT+1))
+        if [ $COUNT -gt 10 ] ; then echo "ABORTING. Tried 10 times to stop old screen."; exit 1; fi
+    done
+
+    cd $STARTDIR
+    # start a screen to later access the output and input:
+    screen -h 3000 -m -d -S easy5-$MYNAME
+	screen -S easy5-$MYNAME -X -p 0 stuff $'echo $$>'$PIDFILE'\n'
+    screen -S easy5-$MYNAME -X -p 0 stuff $'./start.sh\n'
+		# -m -d starts the screen detached from the beginning
+		# -S sets a custom "name" to a screen process
+		# To prevent screen from exiting, no command is given when creating the screen.
+		# Instead commands are then later stuffed into the input buffer of screen with -X -p0 stuff $''
+        # -p 0 just selects the first "window" of the screen.
+        # -h 1234 sets the number of buffered lines to scroll around in with Ctrl-A Escape.
+
+    echo . # init-script etiquette.
+
+    # being verbose and helpful:
+    if [ "$PID" ] && is_pid_running "$PID"; then
+        which pstree >/dev/null 2>&1 && debug "running: `pstree -pnsuUa $PID`"
+    else
+        debug "bash not running: $PID (from PIDFILE $PIDFILE)"
+    fi
+    debug "screens after start: `screen -ls`"
+;;
+"")
+    echo $0 '[start|stop|status|restart]'
+;;
+stop)
+    debug "screens before stop: `screen -ls`"
+
+    echo -n "Stopping $MYNAME ... " ; [ "$DEBUG" ] && echo
+    #screen -S $MYNAME -X quit # does not work if there is more than one screen matching the name
+
+    COUNT=0
+    while get_screen_pid; do
+        debug "Killing screen $SCREENPID"
+        kill $SCREENPID
+        COUNT=$((COUNT+1))
+        if [ $COUNT -gt 10 ] ; then echo "ABORTING. Tried 10 times to stop old screen."; exit 1; fi
+    done
+    echo . # init-script etiquette.
+
+    # cleanup:
+    if [ -e "$PIDFILE" ] ; then 
+        PID=`<$PIDFILE` # needed for output below
+        rm ${PIDFILE}.stopped >/dev/null 2>&1
+        mv $PIDFILE ${PIDFILE}.stopped
+    fi
+
+    # being verbose and helpful:
+    if [ "$PID" ] && is_pid_running "$PID" ; then
+        which pstree >/dev/null 2>&1 && debug "Processes under bash $PID after stop: `pstree -pnsuUa $PID`"
+    else
+        debug "No process with PID '$PID' running. (PID was bash's ID according to PIDFILE '$PIDFILE')"
+    fi
+    debug "Screens after stop: `screen -ls`"
+;;
+restart)
+	$0 stop
+	echo Sleeping $SLEEP_RESTART seconds to allow $0 to clean up.
+	sleep $SLEEP_RESTART
+	$0 start
+;;
+runs)
+    [ -e "$PIDFILE" ] || exit 64 # PID of bash not known due to missing PID file $PIDFILE. Unable to check for running $NAME_IN_PSTREE of ${MYNAME}-instance.
+    PID=`<$PIDFILE`
+    is_pid_running $PID || exit 32
+
+    pstree -pnuUa $PID|grep -q $NAME_IN_PSTREE && exit 0
+
+    debug "No $NAME_IN_PSTREE found under bash $PID."
+    exit 3
+;;
+status)
+    EXIT=0
+    ### server processes
+    NUMRUN=`ps x|grep $NAME_IN_PS|grep -v grep|wc -l` # easydb-server processes running as $LOGNAME
+    if [ $NUMRUN -eq 0 ] ; then
+        echo "No $NAME_IN_PS running for user $RUNAS at all."
+        EXIT=$((EXIT+8))
+    else
+        debug "$NUMRUN processes of $NAME_IN_PS running for user $RUNAS. (for whatever instances)"
+    fi
+
+    ### screen
+	if get_screen_pid && is_pid_running $SCREENPID ; then
+        echo "$MYNAME: Processes in screen:"
+		pstree -pnuUa $SCREENPID || debug "Warning: No success showing pstree for screen pid '$SCREENPID'."
+	else
+		echo "$MYNAME: No screen running."
+        EXIT=$((EXIT+16))
+	fi
+
+    ### server processes under the bash
+    if [ -e "$PIDFILE" ] ; then
+        PID=`<$PIDFILE`
+        if is_pid_running $PID ; then
+            if get_screen_pid && is_pid_running $SCREENPID ; then
+                debug "$MYNAME: Already showed pstree under screen, not showing again for bash."
+            else
+                echo "$MYNAME Processes under bash $PID (taken from PIDFILE '$PIDFILE') :"
+                pstree -pnuUa $PID || debug "Warning: No success showing pstree for bash pid '$PID'."
+            fi
+        else
+            echo "$MYNAME: bash $PID is not running. (taken from PIDFILE '$PIDFILE')"
+            EXIT=$((EXIT+32))
+        fi
+    else
+        EXIT=$((EXIT+64))
+        debug "PID of bash not known due to missing PID file $PIDFILE. Unable to check for running $NAME_IN_PSTREE of ${MYNAME}-instance."
+    fi
+
+    exit $EXIT
+;;
+*)
+	echo $0 '[start|stop|restart|status]'
+esac
