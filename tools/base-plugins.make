@@ -1,5 +1,5 @@
 WEB = build/webfrontend
-L10N2JSON := easydb-l10n2json.py
+L10N2JSON ?= easydb-l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
 SCSS ?= $(WEB)/${PLUGIN_NAME}.scss
