@@ -1,4 +1,4 @@
-# these common methods are used by the plugins, developed by the vzg: gnd, geonames, gn250, gvk, georef, dante
+# these common classes + methods are used by the plugins, developed by the vzg: gnd, geonames, gn250, gvk, georef, dante
 
 class CustomDataTypeWithCommons extends CustomDataType
 
@@ -7,6 +7,121 @@ class CustomDataTypeWithCommons extends CustomDataType
     style = DOM.element("style")
     style.innerHTML = ".commonPlugin_Popover { min-width:600px !important; } .commonPlugin_Input .cui-button-visual, .commonPlugin_Select .cui-button-visual { width: 100%; } .commonPlugin_Select > div { width: 100%; }"
     document.head.appendChild(style)
+
+
+#new
+
+  initData: (data) ->
+      if not data[@name()]
+          cdata = {}
+          data[@name()] = cdata
+      else
+          cdata = data[@name()]
+
+      if not cdata.url
+          cdata.url = ""
+
+      cdata
+
+  # returns a map for search tokens, containing name and value strings.
+  getQueryFieldBadge: (data) =>
+      # CUI.error "getQueryFieldBadge", data
+      if data["#{@name()}:unset"]
+          value = $$("text.column.badge.without")
+      else
+          value = data[@name()]
+
+      name: @nameLocalized()
+      value: value
+
+
+  supportsFacet: ->
+      true
+
+
+  getFacet: (opts) ->
+      opts.field = @
+      new CustomDataTypeCommonFacet(opts)
+
+
+  # returns markup to display in expert search
+  renderSearchInput: (data, opts={}) ->
+      console.warn "CustomDataTypeGND.renderSearchInput", data, opts
+      console.log "-------"
+      search_token = new SearchToken
+          column: @
+          data: data
+          fields: opts.fields
+      .getInput().DOM
+
+
+  getFieldNamesForSearch: ->
+      @getFieldNames()
+
+
+  getFieldNamesForSuggest: ->
+      @getFieldNames()
+
+
+  getFieldNames: ->
+
+      field_names = [
+          @fullName()+".conceptURI"
+          @fullName()+".conceptName"
+      ]
+
+      #for lang in ez5.session.getPref("search_languages")
+      #  field_names.push(@fullName()+".text."+lang)
+
+      field_names
+
+
+	# returns a search filter suitable to the search array part
+	# of the request, the data to be search is in data[key] plus
+	# possible additions, which should be stored in key+":<additional>"
+
+  getSearchFilter: (data, key=@name()) ->
+
+      if data[key+":unset"]
+          filter =
+              type: "in"
+              fields: [ @fullName()+".conceptName" ]
+              in: [ null ]
+          filter._unnest = true
+          filter._unset_filter = true
+          return filter
+
+      filter = super(data, key)
+      if filter
+          return filter
+
+      if isEmpty(data[key])
+          return
+
+      val = data[key]
+      [str, phrase] = Search.getPhrase(val)
+
+      switch data[key+":type"]
+          when "token", "fulltext", undefined
+              filter =
+                  type: "match"
+                  # mode can be fulltext, token or wildcard
+                  mode: data[key+":mode"]
+                  fields: @getFieldNamesForSearch()
+                  string: str
+                  phrase: phrase
+
+          when "field"
+              filter =
+                  type: "in"
+                  fields: @getFieldNamesForSearch()
+                  in: [ str ]
+
+      # console.error "search filter", data, key, data[key+":type"], filter
+
+      filter
+
+#alt
 
 
   #######################################################################
@@ -119,11 +234,18 @@ class CustomDataTypeWithCommons extends CustomDataType
     if opts.demo_data
       # return demo data here
       return {
-        conceptName : ''
-        conceptURI : ''
+        conceptName : 'Example'
+        conceptURI : 'https://example.com'
       }
-    
+
     cdata = data[@name()] or data._template?[@name()]
+
+    url = cdata.conceptURI.trim()
+    console.log(url);
+    loc = CUI.parseLocation(url)
+    parts = loc.hostname.split(".")
+    console.log(parts);
+    console.log(parts[parts.length - 1]);
 
     switch @getDataStatus(cdata)
       when "invalid"
@@ -136,6 +258,9 @@ class CustomDataTypeWithCommons extends CustomDataType
         save_data[@name()] =
           conceptName: cdata.conceptName.trim()
           conceptURI: cdata.conceptURI.trim()
+          _fulltext:
+                  text: cdata.conceptName.trim()
+                  string: cdata.conceptURI.trim()
 
 
   #######################################################################
@@ -195,10 +320,51 @@ class CustomDataTypeWithCommons extends CustomDataType
             conceptURI : ''
         }
       return "empty"
-    
-    
+
+
   #######################################################################
   # zeige die gewählten Optionen im Datenmodell unter dem Button an
   getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
     if Object.keys(custom_settings).length == 0
       ['Ohne Optionen']
+
+
+
+class CustomDataTypeCommonFacet extends Facet
+
+  initOpts: ->
+      super()
+      @addOpts
+          field:
+              mandatory: true
+              check: Field
+
+  requestFacetWithLimit: ->
+      limit: @getLimit()
+      field: @_field.fullName()+".conceptName"
+      sort: "term"
+      type: "term"
+
+  getObjects: (key=@name(), data=@data()) ->
+      data[key]?.terms or []
+
+  renderObjectText: (object) ->
+      object.term
+
+  getObjectPath: (obj) ->
+      [obj.term]
+
+  name: ->
+      "cdt_link"
+
+  name: ->
+      @_field.fullName()+".conceptName"
+
+  nameLocalized: ->
+      @_field.nameLocalized()
+
+  requestSearchFilter: (obj) ->
+      bool: "must"
+      fields: [ @_field.fullName()+".conceptName" ]
+      type: "in"
+      in: [ obj.term ]
