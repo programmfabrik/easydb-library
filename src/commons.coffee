@@ -240,9 +240,6 @@ class CustomDataTypeWithCommons extends CustomDataType
 
     cdata = data[@name()] or data._template?[@name()]
 
-    url = cdata.conceptURI.trim()
-    name = cdata.conceptName.trim()
-
     switch @getDataStatus(cdata)
       when "invalid"
         throw InvalidSaveDataException
@@ -252,11 +249,11 @@ class CustomDataTypeWithCommons extends CustomDataType
 
       when "ok"
         save_data[@name()] =
-          conceptName: name
-          conceptURI: url
+          conceptName: cdata.conceptName.trim()
+          conceptURI: cdata.conceptURI.trim()
           _fulltext:
-                  text: name
-                  string: url
+                  text: cdata.conceptName.trim()
+                  string: cdata.conceptURI.trim()
 
 
   #######################################################################
