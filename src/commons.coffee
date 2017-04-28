@@ -241,11 +241,7 @@ class CustomDataTypeWithCommons extends CustomDataType
     cdata = data[@name()] or data._template?[@name()]
 
     url = cdata.conceptURI.trim()
-    console.log(url);
-    loc = CUI.parseLocation(url)
-    parts = loc.hostname.split(".")
-    console.log(parts);
-    console.log(parts[parts.length - 1]);
+    name = cdata.conceptName.trim()
 
     switch @getDataStatus(cdata)
       when "invalid"
@@ -256,11 +252,11 @@ class CustomDataTypeWithCommons extends CustomDataType
 
       when "ok"
         save_data[@name()] =
-          conceptName: cdata.conceptName.trim()
-          conceptURI: cdata.conceptURI.trim()
+          conceptName: name
+          conceptURI: url
           _fulltext:
-                  text: cdata.conceptName.trim()
-                  string: cdata.conceptURI.trim()
+                  text: name
+                  string: url
 
 
   #######################################################################
