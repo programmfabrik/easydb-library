@@ -8,9 +8,6 @@ class CustomDataTypeWithCommons extends CustomDataType
     style.innerHTML = ".commonPlugin_Popover { min-width:600px !important; } .commonPlugin_Input .cui-button-visual, .commonPlugin_Select .cui-button-visual { width: 100%; } .commonPlugin_Select > div { width: 100%; }"
     document.head.appendChild(style)
 
-
-#new
-
   initData: (data) ->
       if not data[@name()]
           cdata = {}
@@ -120,8 +117,6 @@ class CustomDataTypeWithCommons extends CustomDataType
       # console.error "search filter", data, key, data[key+":type"], filter
 
       filter
-
-#alt
 
 
   #######################################################################
