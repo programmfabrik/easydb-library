@@ -43,8 +43,6 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   # returns markup to display in expert search
   renderSearchInput: (data, opts={}) ->
-      console.warn "CustomDataTypeGND.renderSearchInput", data, opts
-      console.log "-------"
       search_token = new SearchToken
           column: @
           data: data
@@ -114,15 +112,12 @@ class CustomDataTypeWithCommons extends CustomDataType
                   fields: @getFieldNamesForSearch()
                   in: [ str ]
 
-      # console.error "search filter", data, key, data[key+":type"], filter
-
       filter
 
 
   #######################################################################
   # handle editorinput
   renderEditorInput: (data, top_level_data, opts) ->
-    #console.error @, data, top_level_data, opts, @name(), @fullName()
 
     if not data[@name()]
       cdata = {
