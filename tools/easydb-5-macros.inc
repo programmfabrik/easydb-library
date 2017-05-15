@@ -80,13 +80,13 @@
 	<Files ~ "\.(html|json|js|css|otf|eot|ttf|woff|woff2)$">
 		Header set "Access-Control-Allow-Origin" "*"
 		Header set "Access-Control-Allow-Headers" "Authorization, X-Easydb-Token"
-		Header set "Cache-Control" "no-cache,private,max-age=86400"
+		Header set "Cache-Control" "no-cache,private,must-revalidate"
 	</Files>
 
 	<LocationMatch ^/api/(v1/|)(l10n|plugin)/static>
 		Header set "Access-Control-Allow-Origin" "*"
 		Header set "Access-Control-Allow-Headers" "Authorization, X-Easydb-Token"
-		Header set "Cache-Control" "no-cache,private,max-age=86400"
+		Header set "Cache-Control" "no-cache,private,must-revalidate"
 	</LocationMatch>
 
 	ErrorDocument 404 /cgi-bin/error-handler.sh
