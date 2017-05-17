@@ -41,7 +41,7 @@ for idx in range(1, len(sys.argv)-1):
         line = 1 # the first line was skipped as it is contains the keys for the dict
         for row in reader:
 
-            loca_key = row["key"]
+            loca_key = row["key"].strip()
             for culture in row.keys():
                 if culture not in cultures_plain:
                     continue
@@ -57,7 +57,7 @@ for idx in range(1, len(sys.argv)-1):
                 if row[culture] == None:
                     target_dict[culture][loca_key] = ""
                 else:
-                    target_dict[culture][loca_key] = row[culture]
+                    target_dict[culture][loca_key] = row[culture].strip()
             line = line + 1
 
 for culture, loca_keys in target_dict.iteritems():
