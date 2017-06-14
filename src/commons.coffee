@@ -313,14 +313,7 @@ class CustomDataTypeWithCommons extends CustomDataType
 
 
 
-class CustomDataTypeCommonFacet extends Facet
-
-  initOpts: ->
-      super()
-      @addOpts
-          field:
-              mandatory: true
-              check: Field
+class CustomDataTypeCommonFacet extends FieldFacet
 
   requestFacetWithLimit: ->
       limit: @getLimit()
@@ -342,9 +335,6 @@ class CustomDataTypeCommonFacet extends Facet
 
   name: ->
       @_field.fullName()+".conceptName"
-
-  nameLocalized: ->
-      @_field.nameLocalized()
 
   requestSearchFilter: (obj) ->
       bool: "must"
