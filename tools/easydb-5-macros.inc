@@ -18,6 +18,7 @@
 
 	<Location />
 		Options -Indexes
+		Require all granted
 	</Location>
 
 	AliasMatch ^/imexporter/ $server_basedir/src/imexporter/imexporter-$uniqueid
