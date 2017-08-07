@@ -1,4 +1,5 @@
 WEB = build/webfrontend
+COFFEE = ./node_modules/.bin/coffee
 L10N2JSON ?= easydb-l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
@@ -20,7 +21,7 @@ build-stamp-l10n: $(L10N_FILES)
 	touch $@
 
 %.coffee.js: %.coffee
-	coffee -b -p --compile "$^" > "$@" || ( rm -f "$@" ; false )
+	${COFFEE} -b -p --compile "$^" > "$@" || ( rm -f "$@" ; false )
 
 $(WEB)/%: src/webfrontend/%
 	mkdir -p $(dir $@)
