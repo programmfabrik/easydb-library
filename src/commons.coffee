@@ -68,7 +68,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       #for lang in ez5.session.getPref("search_languages")
       #  field_names.push(@fullName()+".text."+lang)
 
-      field_names
+      return field_names
 
 
 	# returns a search filter suitable to the search array part
@@ -119,16 +119,15 @@ class CustomDataTypeWithCommons extends CustomDataType
   # handle editorinput
   renderEditorInput: (data, top_level_data, opts) ->
 
-    if not data[@name()]
+    name = @name()
+    if not data[name]
       cdata = {
             conceptName : ''
             conceptURI : ''
         }
-      data[@name()] = cdata
-    else
-      cdata = data[@name()]
+      data[name] = cdata
 
-    @__renderEditorInputPopover(data, cdata)
+    @__renderEditorInputPopover(data, data[name])
 
 
   #######################################################################
@@ -212,11 +211,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   ########################################################################
   # check if field is empty
   # needed for editor-table-view
-  isEmpty: (data, top_level_data, opts) ->
-      if data[@name()]?.conceptName
-          false
-      else
-          true
+  isEmpty: (data, top_level_data, opts) -> not data[@name()]?.conceptName
 
   #######################################################################
   # is called, when record is being saved by user
@@ -291,18 +286,7 @@ class CustomDataTypeWithCommons extends CustomDataType
             return "empty"
 
           return "invalid"
-        else
-          cdata = {
-                conceptName : ''
-                conceptURI : ''
-            }
-          return "empty"
-    else
-      cdata = {
-            conceptName : ''
-            conceptURI : ''
-        }
-      return "empty"
+    return "empty"
 
 
   #######################################################################
