@@ -62,6 +62,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       field_names = [
           @fullName()+".conceptURI"
           @fullName()+".conceptName"
+          @fullName()+".conceptSeeAlso"
       ]
 
       #for lang in ez5.session.getPref("search_languages")
@@ -122,6 +123,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       cdata = {
             conceptName : ''
             conceptURI : ''
+            conceptSeeAlso : ''
         }
       data[@name()] = cdata
     else
@@ -156,6 +158,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                         cdata = {
                               conceptName : ''
                               conceptURI : ''
+                              conceptSeeAlso : ''
                         }
                         data[@name()] = cdata
                         # trigger form change
@@ -225,6 +228,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       return {
         conceptName : 'Example'
         conceptURI : 'https://example.com'
+        conceptSeeAlso : 'Beispiel,Exemplo,Instance'
       }
 
     cdata = data[@name()] or data._template?[@name()]
@@ -237,12 +241,13 @@ class CustomDataTypeWithCommons extends CustomDataType
         save_data[@name()] = null
 
       when "ok"
-        save_data[@name()] =
-          conceptName: cdata.conceptName.trim()
-          conceptURI: cdata.conceptURI.trim()
+        field_value = {}
+        ;['conceptName', 'conceptURI', 'conceptSeeAlso'].map (n) ->
+          field_value[n] = if cdata[n] then cdata[n].trim() else ""
+        save_data[@name()] = Object.assign field_value,
           _fulltext:
-                  text: cdata.conceptName.trim()
-                  string: cdata.conceptURI.trim()
+            text: save_data.conceptName + save_data.conceptSeeAlso
+            string: save_data.conceptURI
 
 
   #######################################################################
@@ -294,12 +299,14 @@ class CustomDataTypeWithCommons extends CustomDataType
           cdata = {
                 conceptName : ''
                 conceptURI : ''
+                conceptSeeAlso: ''
             }
           return "empty"
     else
       cdata = {
             conceptName : ''
             conceptURI : ''
+            conceptSeeAlso: ''
         }
       return "empty"
 
@@ -346,3 +353,4 @@ class CustomDataTypeCommonFacet extends FieldFacet
       in: [ obj.term ]
 
 
+# vim: sw=2 et
