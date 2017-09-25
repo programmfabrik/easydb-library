@@ -135,12 +135,12 @@ class CustomDataTypeWithCommons extends CustomDataType
   # buttons, which open and close popover
   __renderEditorInputPopover: (data, cdata) ->
 
-    layout = new HorizontalLayout
+    layout = new CUI.HorizontalLayout
       left:
         content:
-            new Buttonbar(
+            new CUI.Buttonbar(
               buttons: [
-                  new Button
+                  new CUI.Button
                       text: ""
                       icon: 'edit'
                       group: "groupA"
@@ -148,7 +148,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                       onClick: (ev, btn) =>
                         @showEditPopover(btn, cdata, layout)
 
-                  new Button
+                  new CUI.Button
                       text: ""
                       icon: 'trash'
                       group: "groupA"
@@ -184,7 +184,7 @@ class CustomDataTypeWithCommons extends CustomDataType
 
     # set default value for count of suggestions
     cdata.countOfSuggestions = 20
-    cdata_form = new Form
+    cdata_form = new CUI.Form
       data: cdata
       fields: @__getEditorFields(cdata)
       onDataChanged: =>
@@ -194,17 +194,17 @@ class CustomDataTypeWithCommons extends CustomDataType
     .start()
 
     # init suggestmenu
-    suggest_Menu = new Menu
+    suggest_Menu = new CUI.Menu
         element : cdata_form.getFieldsByName("searchbarInput")[0]
         use_element_width_as_min_width: true
 
-    @popover = new Popover
+    @popover = new CUI.Popover
       element: btn
       placement: "wn"
       class: "commonPlugin_Popover"
       pane:
         # titel of popovers
-        header_left: new Label(text: 'Auswahl treffen')
+        header_left: new CUI.Label(text: 'Auswahl treffen')
         content: cdata_form
     .show()
 
