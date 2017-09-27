@@ -161,10 +161,10 @@ class CustomDataTypeWithCommons extends CustomDataType
                         data[@name()] = cdata
                         # trigger form change
                         @__updateResult(cdata, layout)
-                        Events.trigger
+                        CUI.Events.trigger
                           node: @__layout
                           type: "editor-changed"
-                        Events.trigger
+                        CUI.Events.trigger
                           node: layout
                           type: "editor-changed"
               ]
@@ -262,7 +262,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       else
         element.removeClass("cui-input-invalid")
 
-    Events.trigger
+    CUI.Events.trigger
       node: element
       type: "editor-changed"
 
