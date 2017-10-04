@@ -90,7 +90,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       if filter
           return filter
 
-      if isEmpty(data[key])
+      if CUI.util.isEmpty(data[key])
           return
 
       val = data[key]
