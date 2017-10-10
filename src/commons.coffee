@@ -331,9 +331,6 @@ class CustomDataTypeCommonFacet extends FieldFacet
       [obj.term]
 
   name: ->
-      "cdt_link"
-
-  name: ->
       @_field.fullName()+".conceptName"
 
   requestSearchFilter: (obj) ->
