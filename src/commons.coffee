@@ -341,3 +341,8 @@ class CustomDataTypeCommonFacet extends FieldFacet
       fields: [ @_field.fullName()+".conceptName" ]
       type: "in"
       in: [ obj.term ]
+
+  getGroupingText: ->
+      @_field.getMainMask().table.nameLocalized() 
+								
+								
