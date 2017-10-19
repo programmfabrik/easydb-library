@@ -315,6 +315,13 @@ class CustomDataTypeWithCommons extends CustomDataType
 
 class CustomDataTypeCommonFacet extends FieldFacet
 
+  initOpts: ->
+      super()
+      @addOpts
+          field:
+              mandatory: true
+              check: Field
+
   requestFacetWithLimit: ->
       limit: @getLimit()
       field: @_field.fullName()+".conceptName"
@@ -338,5 +345,5 @@ class CustomDataTypeCommonFacet extends FieldFacet
       fields: [ @_field.fullName()+".conceptName" ]
       type: "in"
       in: [ obj.term ]
-	
-								
+
+
