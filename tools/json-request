@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+
+import json, os, shlex, sys
+from optparse import OptionParser
+
+parser = OptionParser(usage='usage: %prog [options] [file]')
+parser.add_option('-e', '--exec',
+    dest='exec', action="store_true", default=False,
+    help='execute request with curl after parsing')
+
+(options, args) = parser.parse_args()
+
+f = sys.stdin
+if len(args) > 0:
+    f = open(args[0], 'r')
+
+p = json.load(f)
+if "request" in p:
+    req = p["request"]
+else:
+    req = p
+
+url = req["url"]
+body = req.get('body')
+headers = req.get('headers', {})    
+method = req.get('method', 'GET')
+
+cmd = [
+    "curl",
+    "-X", method,
+]
+
+for k, v in headers.items():
+    if v is not None:
+        cmd.extend(['-H', "{}: {}".format(k, v)])
+
+cmd.append(url)
+if body and len(body):
+    
+    cmd.extend(['--data-binary', body])
+
+cmdline = " ".join(map(shlex.quote, cmd))
+    
+if options.exec:
+    os.system(cmdline)
+else:
+    print(cmdline)
