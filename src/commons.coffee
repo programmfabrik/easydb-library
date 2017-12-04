@@ -306,9 +306,9 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   #######################################################################
   # zeige die gewählten Optionen im Datenmodell unter dem Button an
-  getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
-    if Object.keys(custom_settings).length == 0
-      ['Ohne Optionen']
+  #getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
+  #  if Object.keys(custom_settings).length == 0
+  #    ['Ohne Optionen']
 
 
 
