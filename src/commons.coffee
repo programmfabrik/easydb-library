@@ -246,8 +246,8 @@ class CustomDataTypeWithCommons extends CustomDataType
           field_value[n] = if cdata[n] then cdata[n].trim() else ""
         save_data[@name()] = Object.assign field_value,
           _fulltext:
-            text: save_data.conceptName + save_data.conceptSeeAlso
-            string: save_data.conceptURI
+            text: field_value.conceptName + " " + field_value.conceptSeeAlso
+            string: field_value.conceptURI
 
 
   #######################################################################
