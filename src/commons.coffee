@@ -1,4 +1,5 @@
 # these common classes + methods are used by the plugins, developed by the vzg: gnd, geonames, gn250, gvk, georef, dante
+
 class CustomDataTypeWithCommons extends CustomDataType
 
   # custom style to head
@@ -58,7 +59,7 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   getFieldNames: ->
 
-      return [
+      field_names = [
           @fullName()+".conceptURI"
           @fullName()+".conceptName"
       ]
@@ -344,136 +345,4 @@ class CustomDataTypeCommonFacet extends FieldFacet
       type: "in"
       in: [ obj.term ]
 
-class CustomDataTypeWithCommonsSeeAlso extends CustomDataTypeWithCommons
 
-  getFieldNames: ->
-      return [
-          @fullName()+".conceptURI"
-          @fullName()+".conceptName"
-          @fullName()+".conceptSeeAlso"
-      ]
-
-  #######################################################################
-  # handle editorinput
-  renderEditorInput: (data, top_level_data, opts) ->
-
-    if not data[@name()]
-      cdata = {
-            conceptName : ''
-            conceptURI : ''
-            conceptSeeAlso : ''
-        }
-      data[@name()] = cdata
-    else
-      cdata = data[@name()]
-
-    @__renderEditorInputPopover(data, cdata)
-
-
-  __renderEditorInputPopover: (data, cdata) ->
-
-    layout = new CUI.HorizontalLayout
-      left:
-        content:
-            new CUI.Buttonbar(
-              buttons: [
-                  new CUI.Button
-                      text: ""
-                      icon: 'edit'
-                      group: "groupA"
-
-                      onClick: (ev, btn) =>
-                        @showEditPopover(btn, cdata, layout)
-
-                  new CUI.Button
-                      text: ""
-                      icon: 'trash'
-                      group: "groupA"
-                      onClick: (ev, btn) =>
-                        # delete data
-                        cdata = {
-                              conceptName : ''
-                              conceptURI : ''
-                              conceptSeeAlso : ''
-                        }
-                        data[@name()] = cdata
-                        # trigger form change
-                        @__updateResult(cdata, layout)
-                        CUI.Events.trigger
-                          node: @__layout
-                          type: "editor-changed"
-                        CUI.Events.trigger
-                          node: layout
-                          type: "editor-changed"
-              ]
-            )
-      center: {}
-      right: {}
-    @__updateResult(cdata, layout)
-    layout
-
-
-  #######################################################################
-  # is called, when record is being saved by user
-  getSaveData: (data, save_data, opts) ->
-    if opts.demo_data
-      # return demo data here
-      return {
-        conceptName : 'Example'
-        conceptURI : 'https://example.com'
-        conceptSeeAlso : 'Beispiel,Exemplo,Instance'
-      }
-
-    cdata = data[@name()] or data._template?[@name()]
-
-    switch @getDataStatus(cdata)
-      when "invalid"
-        throw InvalidSaveDataException
-
-      when "empty"
-        save_data[@name()] = null
-
-      when "ok"
-        field_value = {}
-        ;['conceptName', 'conceptURI', 'conceptSeeAlso'].map (n) ->
-          field_value[n] = if cdata[n] then cdata[n].trim() else ""
-        save_data[@name()] = Object.assign field_value,
-          _fulltext:
-            text: field_value.conceptName + " " + field_value.conceptSeeAlso
-            string: field_value.conceptURI
-
-  #######################################################################
-  # checks the form and returns status
-  getDataStatus: (cdata) ->
-    if (cdata)
-        if cdata.conceptURI and cdata.conceptName
-          # check url for valididy
-          uriCheck = CUI.parseLocation(cdata.conceptURI)
-
-          nameCheck = if cdata.conceptName then cdata.conceptName.trim() else undefined
-
-          if uriCheck and nameCheck
-            return "ok"
-
-          if cdata.conceptURI.trim() == '' and cdata.conceptName.trim() == ''
-            return "empty"
-
-          return "invalid"
-        else
-          cdata = {
-                conceptName : ''
-                conceptURI : ''
-                conceptSeeAlso: ''
-            }
-          return "empty"
-    else
-      cdata = {
-            conceptName : ''
-            conceptURI : ''
-            conceptSeeAlso: ''
-        }
-      return "empty"
-
-
-
-# vim: sw=2 et
