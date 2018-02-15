@@ -210,8 +210,11 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   ########################################################################
   # check if field is empty
-  # needed for editor-table-view
-  isEmpty: (data, top_level_data, opts) ->
+  isEmpty: (data, top_level_data, opts={}) ->
+      if opts?.mode == "expert"
+          # check plain input in search
+          return CUI.util.isEmpty(data[@name()]?.trim())
+
       if data[@name()]?.conceptName
           false
       else
