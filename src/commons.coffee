@@ -34,6 +34,23 @@ class CustomDataTypeWithCommons extends CustomDataType
       new CustomDataTypeCommonFacet(opts)
 
 
+  # provide a sort function to sort your data
+  getSortFunction: ->
+      (a, b) =>
+          CUI.util.compareIndex(a[@name()]?.conceptName or 'zzz', b[@name()]?.conceptName or 'zzz')
+
+  sortExtraOpts: ->
+    return [
+      {
+        text: "conceptName"
+        value: "conceptName"
+      }
+      {
+        text: "conceptURI"
+        value: "conceptURI"
+      }
+    ]
+
   # returns markup to display in expert search
   renderSearchInput: (data, opts={}) ->
       search_token = new SearchToken
