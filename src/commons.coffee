@@ -2,12 +2,6 @@
 
 class CustomDataTypeWithCommons extends CustomDataType
 
-  # custom style to head
-  CUI.ready =>
-    style = CUI.dom.element("style")
-    style.innerHTML = ".commonPlugin_Popover { min-width:600px !important; min-height: 200px !important; } .commonPlugin_Input .cui-button-visual, .commonPlugin_Select .cui-button-visual { width: 100%; } .commonPlugin_Select > div { width: 100%; }"
-    document.head.appendChild(style)
-
   initData: (data) ->
       if not data[@name()]
           cdata = {}
