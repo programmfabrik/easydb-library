@@ -39,6 +39,10 @@ class CustomDataTypeWithCommons extends CustomDataType
       (a, b) =>
           CUI.util.compareIndex(a[@name()]?.conceptName or 'zzz', b[@name()]?.conceptName or 'zzz')
 
+  # Enable sort
+  hasRenderForSort: ->
+    return true
+
   sortExtraOpts: ->
     return [
       {
