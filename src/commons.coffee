@@ -14,6 +14,12 @@ class CustomDataTypeWithCommons extends CustomDataType
 
       cdata
 
+  renderFieldAsGroup: ->
+    return false
+
+  renderRowAsBlock: (data, top_level_data, opts) ->
+    false
+
   # returns a map for search tokens, containing name and value strings.
   getQueryFieldBadge: (data) =>
       if data["#{@name()}:unset"]
