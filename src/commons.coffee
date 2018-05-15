@@ -273,7 +273,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   # update result in Masterform
   __updateResult: (cdata, layout) ->
     btn = @__renderButtonByData(cdata)
-    layout.replace(btn, "right")
+    layout.replace(btn, "center")
 
 
   #######################################################################
