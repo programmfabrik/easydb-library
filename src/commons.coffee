@@ -31,6 +31,10 @@ class CustomDataTypeWithCommons extends CustomDataType
       value: value
 
 
+  supportsStandard: ->
+      true
+
+
   supportsFacet: ->
       true
 
@@ -245,7 +249,6 @@ class CustomDataTypeWithCommons extends CustomDataType
   # is called, when record is being saved by user
   getSaveData: (data, save_data, opts) ->
     if opts.demo_data
-      # return demo data here
       return {
         conceptName : 'Example'
         conceptURI : 'https://example.com'
@@ -255,7 +258,10 @@ class CustomDataTypeWithCommons extends CustomDataType
 
     switch @getDataStatus(cdata)
       when "invalid"
-        throw InvalidSaveDataException
+        if opts.copy
+            save_data[@name()] = null
+        else
+            throw new InvalidSaveDataException()
 
       when "empty"
         save_data[@name()] = null
@@ -267,6 +273,9 @@ class CustomDataTypeWithCommons extends CustomDataType
           _fulltext:
                   text: cdata.conceptName.trim()
                   string: cdata.conceptURI.trim()
+          _standard:
+                  text: cdata.conceptName.trim()
+                  l10ntext: cdata.conceptName.trim()
 
 
   #######################################################################
