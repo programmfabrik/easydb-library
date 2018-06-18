@@ -272,10 +272,9 @@ class CustomDataTypeWithCommons extends CustomDataType
           conceptURI: cdata.conceptURI.trim()
           _fulltext:
                   text: cdata.conceptName.trim()
-                  string: cdata.conceptURI.trim()
+                  string: cdata.conceptName.trim()
           _standard:
                   text: cdata.conceptName.trim()
-                  l10ntext: cdata.conceptName.trim()
 
 
   #######################################################################
