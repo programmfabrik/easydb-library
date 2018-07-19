@@ -32,7 +32,7 @@
 		$solution_basedir/$2/plugins/$3/build/webfrontend/$4
 
 	# /api/eas/put to "upload" socket
-	AliasMatch ^/api/(v1/|)eas/put$ $server_basedir/src/imexporter/upload-$uniqueid
+	# AliasMatch ^/api/(v1/|)eas/put$ $server_basedir/src/imexporter/upload-$uniqueid
 	
 	RewriteEngine on
 	RewriteCond $webfrontend_basedir/build/%{REQUEST_URI} !-f
@@ -59,6 +59,9 @@
 # 		-idle-timeout 3000 -socket $imexporter_socket
 # 	FastCgiExternalServer $server_basedir/src/imexporter/upload-$uniqueid \
 # 		-idle-timeout 3000 -socket $upload_socket
+
+	RewriteRule ^/api/(v1/|)eas/put$ \
+		/server-fcgi-upload-$uniqueid [PT,E=QUERY_STRING:/$1$2,E=PATH_INFO:/$1$2,E=SCRIPT_NAME:/api/$1$2]
 
 	RewriteCond %{REQUEST_URI} !^/api/(v1/|)(l10n|plugin)/static
 	RewriteCond %{REQUEST_URI} !^/api/(v1/|)eas/put
