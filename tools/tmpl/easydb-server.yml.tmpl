@@ -1,8 +1,8 @@
 %YAML 1.2
 
 include_before:
-  - ../base/base.yml
-  - ../base/plugins/base-plugins.yml
+  - ../../base/base.yml
+  - ../../../plugins/base-plugins.yml
 
 solution:
   name: $SOLUTION_NAME
@@ -15,8 +15,8 @@ logging:
 
 server:
   directory:
-    pflib: $PFLIB_DIR
-    imexporter: $IMEXPORTER_DIR
+    pflib: ../../pflib/src/pflib
+    imexporter: .
     output: $OUTPUT_DIR
     logfile: $LOG_FILE
     server_errors: $SERVER_ERROR_DIR
