@@ -1,0 +1,54 @@
+%YAML 1.2
+
+include_before:
+  - ../base/base.yml
+  - ../base/plugins/base-plugins.yml
+
+solution:
+  name: $SOLUTION_NAME
+
+schema:
+  dsn: port=$DB_PORT user=$DB_USER dbname=$DB_NAME
+
+logging:
+  pf: $LOGLEVEL
+
+server:
+  directory:
+    pflib: $PFLIB_DIR
+    imexporter: $IMEXPORTER_DIR
+    output: $OUTPUT_DIR
+    logfile: $LOG_FILE
+    server_errors: $SERVER_ERROR_DIR
+    elasticsearch: $ELASTIC_SEARCH_DIR
+  exporter:
+    num_workers: 1
+  imexporter:
+    num_services: 1
+    socket: $IMEXPORTER_SOCKET
+  frontend:
+    slow:
+      num_services: 1
+      socket: $FRONTEND_SLOW_SOCKET
+    medium:
+      num_services: 1
+      socket: $FRONTEND_MEDIUM_SOCKET
+    fast:
+      num_services: 1
+      socket: $FRONTEND_FAST_SOCKET
+  upload:
+    num_services: 1
+    socket: $UPLOAD_SOCKET
+  indexer:
+    num_processes: 1
+
+
+eas:
+  instance: $EAS_INSTANCE
+  url: $EAS_URL
+  external_url: $EAS_EXTERNAL_URL
+
+elasticsearch:
+  url: $ELASTIC_SEARCH_URL
+
+# vim:set ts=2 et ft=yaml:
