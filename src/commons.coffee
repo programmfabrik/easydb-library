@@ -1,4 +1,4 @@
-# these common classes + methods are used by the plugins, developed by the vzg: gnd, geonames, gn250, gvk, georef, dante
+# these common classes + methods are used by the plugins, developed by the vzg: gnd, geonames, gn250, gvk, georef, dante, getty, tna_discovery
 
 class CustomDataTypeWithCommons extends CustomDataType
 
@@ -143,58 +143,115 @@ class CustomDataTypeWithCommons extends CustomDataType
   # handle editorinput
   renderEditorInput: (data, top_level_data, opts) ->
 
-    if not data[@name()]
-      cdata = {
+    name = @name()
+    if not data[name]
+      data[name] = {
             conceptName : ''
             conceptURI : ''
         }
-      data[@name()] = cdata
-    else
-      cdata = data[@name()]
 
-    @__renderEditorInputPopover(data, cdata)
+    @__renderEditorInputPopover(data, data[name])
 
 
   #######################################################################
   # buttons, which open and close popover
-  __renderEditorInputPopover: (data, cdata) ->
+  __renderEditorInputPopover: (data, cdata, opts={}) ->
 
+    that = @
+    layout
+
+    # if treeview?
+    if that.getCustomMaskSettings().editor_style?.value == 'popover_with_treeview'
+      #cdata = {
+      #      conceptName : ''
+      #      conceptURI : ''
+      #}
+      # make searchfield
+
+      # kann das eventuell raus!?!?
+      # oder für extended suche?
+      search_token = new SearchToken
+          column: @
+          data: data
+          fields: opts.fields
+      search_token.element.readOnly = true
+      search_token.element.placeholder = '<--'
+      # disable till further dev...
+      search_token = null
+
+    # build layout for editor
     layout = new CUI.HorizontalLayout
-      left:
-        content:
-            new CUI.Buttonbar(
-              buttons: [
+        class: ''
+        center:
+          class: ''
+        right:
+          content:
+              new CUI.Buttonbar
+                buttons: [
                   new CUI.Button
-                      text: ""
-                      icon: 'edit'
-                      group: "groupA"
+                    text: ''
+                    icon: new CUI.Icon(class: "fa-ellipsis-v")
+                    class: 'pluginDirectSelectEditSearch'
+                    # show "dots"-menu on click on 3 vertical dots
+                    onClick: (e, dotsButton) =>
+                      dotsButtonMenu = new CUI.Menu
+                          element : dotsButton
+                          menu_items = [
+                              #search
+                              text: $$('custom.data.type.commons.controls.search.label')
+                              value: 'search'
+                              icon_left: new CUI.Icon(class: "fa-search")
+                              onClick: (e2, btn2) ->
+                                that.showEditPopover(dotsButton, cdata, layout, search_token)
+                          ]
 
-                      onClick: (ev, btn) =>
-                        @showEditPopover(btn, cdata, layout)
-
-                  new CUI.Button
-                      text: ""
-                      icon: 'trash'
-                      group: "groupA"
-                      onClick: (ev, btn) =>
-                        # delete data
-                        cdata = {
-                              conceptName : ''
-                              conceptURI : ''
-                        }
-                        data[@name()] = cdata
-                        # trigger form change
-                        @__updateResult(cdata, layout)
-                        CUI.Events.trigger
-                          node: @__layout
-                          type: "editor-changed"
-                        CUI.Events.trigger
-                          node: layout
-                          type: "editor-changed"
-              ]
-            )
-      center: {}
-      right: {}
+                          if typeof that.__getAdditionalTooltipInfo == "function"
+                            detailinfo =
+                              #detailinfo
+                              text: $$('custom.data.type.commons.controls.detailinfo.label')
+                              value: 'detail'
+                              icon_left: new CUI.Icon(class: "fa-info-circle")
+                              disabled: that.isEmpty(data, 0, 0)
+                              tooltip:
+                                markdown: true
+                                placement: 'w'
+                                content: (tooltip) ->
+                                  if !that.isEmpty(data, 0, 0)
+                                    # get jskos-details-data
+                                    encodedURI = encodeURIComponent(cdata.conceptURI)
+                                    extendedInfo_xhr = { "xhr" : undefined }
+                                    that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
+                                    # loader, until details are xhred
+                                    new CUI.Label(icon: "spinner", text: $$('custom.data.type.commons.modal.form.popup.loadingstring'))
+                            menu_items.push detailinfo
+                          uriCall =
+                              # call uri
+                              text: $$('custom.data.type.commons.controls.calluri.label')
+                              value: 'uri'
+                              icon_left: new CUI.Icon(class: "fa-external-link")
+                              disabled: that.isEmpty(data, 0, 0) || ! CUI.parseLocation(cdata.conceptURI)
+                              onClick: ->
+                                window.open cdata.conceptURI, "_blank"
+                          menu_items.push uriCall
+                          deleteClear =
+                              #delete / clear
+                              text: $$('custom.data.type.commons.controls.delete.label')
+                              value: 'delete'
+                              icon_left: new CUI.Icon(class: "fa-trash")
+                              disabled: that.isEmpty(data, 0, 0)
+                              onClick: ->
+                                cdata = {
+                                    conceptName : ''
+                                    conceptURI : ''
+                                }
+                                data[that.name()] = cdata
+                                that.__updateResult(cdata, layout)
+                          menu_items.push deleteClear
+                          itemList =
+                            items: menu_items
+                      dotsButtonMenu.setItemList(itemList)
+                      dotsButtonMenu.show()
+                ]
     @__updateResult(cdata, layout)
     layout
 
@@ -203,6 +260,10 @@ class CustomDataTypeWithCommons extends CustomDataType
   # show popover and fill it with the form-elements
   showEditPopover: (btn, cdata, layout) ->
 
+    that = @
+
+    suggest_Menu
+
     # init xhr-object to abort running xhrs
     searchsuggest_xhr = { "xhr" : undefined }
 
@@ -210,11 +271,11 @@ class CustomDataTypeWithCommons extends CustomDataType
     cdata.countOfSuggestions = 20
     cdata_form = new CUI.Form
       data: cdata
-      fields: @__getEditorFields(cdata)
-      onDataChanged: =>
+      fields: that.__getEditorFields(cdata)
+      onDataChanged: (data, elem) =>
         @__updateResult(cdata, layout)
         @__setEditorFieldStatus(cdata, layout)
-        @__updateSuggestionsMenu(cdata, cdata_form, suggest_Menu, searchsuggest_xhr)
+        @__updateSuggestionsMenu(cdata, cdata_form, data.searchbarInput, elem, suggest_Menu, searchsuggest_xhr, layout)
     .start()
 
     # init suggestmenu
@@ -228,7 +289,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       class: "commonPlugin_Popover"
       pane:
         # titel of popovers
-        header_left: new CUI.Label(text: 'Auswahl treffen')
+        header_left: new CUI.Label(text: $$('custom.data.type.commons.popover.choose.label'))
         content: cdata_form
     .show()
 
@@ -240,10 +301,7 @@ class CustomDataTypeWithCommons extends CustomDataType
           # check plain input in search
           return CUI.util.isEmpty(data[@name()]?.trim())
 
-      if data[@name()]?.conceptName
-          false
-      else
-          true
+      return not data[@name()]?.conceptName
 
   #######################################################################
   # is called, when record is being saved by user
@@ -280,8 +338,86 @@ class CustomDataTypeWithCommons extends CustomDataType
   #######################################################################
   # update result in Masterform
   __updateResult: (cdata, layout) ->
-    btn = @__renderButtonByData(cdata)
-    layout.replace(btn, "center")
+    that = @
+    # if field is not empty
+    if cdata?.conceptURI
+      # die uuid einkürzen..
+      displayURI = cdata.conceptURI
+      displayURI = displayURI.replace('http://', '')
+      displayURI = displayURI.replace('https://', '')
+      uriParts = displayURI.split('/')
+      uuid = uriParts.pop()
+      if uuid.length > 10
+        uuid = uuid.substring(0,5) + '…'
+        uriParts.push(uuid)
+        displayURI = uriParts.join('/')
+
+      info = new CUI.VerticalLayout
+        class: 'ez5-info_commonPlugin'
+        top:
+          content:
+              new CUI.Label
+                text: cdata.conceptName
+                multiline: true
+        bottom:
+          content:
+            new CUI.Button
+              name: "outputButtonHref"
+              appearance: "flat"
+              size: "normal"
+              text: displayURI
+              tooltip:
+                markdown: true
+                placement: 'nw'
+                content: (tooltip) ->
+                  # get jskos-details-data
+                  encodedURI = encodeURIComponent(cdata.conceptURI)
+                  extendedInfo_xhr = { "xhr" : undefined }
+                  if typeof that.__getAdditionalTooltipInfo == "function"
+                    that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
+                    # loader, unteil details are xhred
+                    new CUI.Label(icon: "spinner", text: $$('custom.data.type.commons.modal.form.popup.loadingstring'))
+              onClick: (evt,button) =>
+                  window.open cdata.conceptURI, "_blank"
+
+      layout.replace(info, 'center')
+      layout.addClass('ez5-linked-object-edit')
+      options =
+        class: 'ez5-linked-object-container'
+      layout.__initPane(options, 'center')
+
+    # if field is empty, display searchfield
+    if ! cdata?.conceptURI
+      suggest_Menu_directInput
+
+      inputX = new CUI.Input
+                  class: "pluginDirectSelectEditInput"
+                  undo_and_changed_support: false
+                  name: "directSelectInput"
+                  content_size: false
+                  onKeyup: (input) =>
+                    # do suggest request and show suggestions
+                    searchstring = input.getValueForInput()
+                    if typeof that.__updateSuggestionsMenu == "function"
+                      @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout)
+      inputX.render()
+
+      # init suggestmenu
+      suggest_Menu_directInput = new CUI.Menu
+          element : inputX
+          use_element_width_as_min_width: true
+
+      # init xhr-object to abort running xhrs
+      searchsuggest_xhr = { "xhr" : undefined }
+
+      layout.replace(inputX, 'center')
+      layout.removeClass('ez5-linked-object-edit')
+      options =
+        class: ''
+      layout.__initPane(options, 'center')
+
+    # did data change?
+    that.__setEditorFieldStatus(cdata, layout)
 
 
   #######################################################################
@@ -308,7 +444,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   #######################################################################
   # checks the form and returns status
   getDataStatus: (cdata) ->
-    if (cdata)
+      if (cdata)
         if cdata.conceptURI and cdata.conceptName
           # check url for valididy
           uriCheck = CUI.parseLocation(cdata.conceptURI)
@@ -322,17 +458,6 @@ class CustomDataTypeWithCommons extends CustomDataType
             return "empty"
 
           return "invalid"
-        else
-          cdata = {
-                conceptName : ''
-                conceptURI : ''
-            }
-          return "empty"
-    else
-      cdata = {
-            conceptName : ''
-            conceptURI : ''
-        }
       return "empty"
 
 
@@ -341,7 +466,6 @@ class CustomDataTypeWithCommons extends CustomDataType
   #getCustomDataOptionsInDatamodelInfo: (custom_settings) ->
   #  if Object.keys(custom_settings).length == 0
   #    ['Ohne Optionen']
-
 
 
 class CustomDataTypeCommonFacet extends FieldFacet
