@@ -477,10 +477,10 @@ class CustomDataTypeCommonFacet extends FieldFacet
               mandatory: true
               check: Field
 
-  requestFacetWithLimit: ->
+  requestFacetWithLimit: (obj) ->
       limit: @getLimit()
       field: @_field.fullName()+".conceptName"
-      sort: "term"
+      sort: "count"
       type: "term"
 
   getObjects: (key=@name(), data=@data()) ->
