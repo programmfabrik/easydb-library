@@ -4,7 +4,7 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 L10N2JSON = python2 $(SELF_DIR)/l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
-CSS ?= $(WEB)/${PLUGIN_NAME}.scss
+CSS ?= $(WEB)/${PLUGIN_NAME}.css
 L10N = build-stamp-l10n
 
 scss_call = sass --scss --no-cache --sourcemap=inline
