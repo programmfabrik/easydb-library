@@ -4,5 +4,6 @@ build
 build-stamp-*
 *~
 \#*\#
+\.#*
 commit.txt
 .idea

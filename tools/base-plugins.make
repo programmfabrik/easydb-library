@@ -4,15 +4,18 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 L10N2JSON = python2 $(SELF_DIR)/l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
-SCSS ?= $(WEB)/${PLUGIN_NAME}.scss
+CSS ?= $(WEB)/${PLUGIN_NAME}.scss
 L10N = build-stamp-l10n
 
+scss_call = sass --scss --no-cache --sourcemap=inline
+
+css: $(CSS)
+
+$(CSS): $(SCSS_FILES)
+	mkdir -p $(dir $@)
+	cat $(SCSS_FILES) | $(scss_call) > $(CSS)
 
 ${JS}: $(subst .coffee,.coffee.js,${COFFEE_FILES})
-	mkdir -p $(dir $@)
-	cat $^ > $@
-
-${SCSS}: ${SCSS_FILES}
 	mkdir -p $(dir $@)
 	cat $^ > $@
 
