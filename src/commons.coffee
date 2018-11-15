@@ -396,10 +396,10 @@ class CustomDataTypeWithCommons extends CustomDataType
                   name: "directSelectInput"
                   content_size: false
                   onKeyup: (input) =>
-                    # do suggest request and show suggestions
+                    #  do suggest request and show suggestions
                     searchstring = input.getValueForInput()
                     if typeof that.__updateSuggestionsMenu == "function"
-                      @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout)
+                      @__updateSuggestionsMenu(cdata, 0, searchstring, inputX, suggest_Menu_directInput, searchsuggest_xhr, layout)
       inputX.render()
 
       # init suggestmenu
