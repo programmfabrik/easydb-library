@@ -313,9 +313,6 @@ class CustomDataTypeWithCommons extends CustomDataType
       }
 
     cdata = data[@name()] or data._template?[@name()]
-    console.log "f: getSaveData"
-    console.log data
-    console.log cdata
     switch @getDataStatus(cdata)
       when "invalid"
         if opts.copy
