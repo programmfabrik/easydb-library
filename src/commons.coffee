@@ -313,7 +313,9 @@ class CustomDataTypeWithCommons extends CustomDataType
       }
 
     cdata = data[@name()] or data._template?[@name()]
-
+    console.log "f: getSaveData"
+    console.log data
+    console.log cdata
     switch @getDataStatus(cdata)
       when "invalid"
         if opts.copy
@@ -325,12 +327,22 @@ class CustomDataTypeWithCommons extends CustomDataType
         save_data[@name()] = null
 
       when "ok"
+
+        # was _fulltext already set by plugin?
+        conceptFulltext = ''
+        if cdata?.conceptFulltext
+          conceptFulltext = cdata.conceptFulltext
+        else
+          conceptFulltext = cdata.conceptName.trim()
+
+        # build savedata
         save_data[@name()] =
           conceptName: cdata.conceptName.trim()
           conceptURI: cdata.conceptURI.trim()
+          conceptFulltext: conceptFulltext
           _fulltext:
-                  text: cdata.conceptName.trim()
-                  string: cdata.conceptName.trim()
+                  text: conceptFulltext
+                  string: conceptFulltext
           _standard:
                   text: cdata.conceptName.trim()
 
@@ -396,10 +408,10 @@ class CustomDataTypeWithCommons extends CustomDataType
                   name: "directSelectInput"
                   content_size: false
                   onKeyup: (input) =>
-                    #  do suggest request and show suggestions
+                    # do suggest request and show suggestions
                     searchstring = input.getValueForInput()
                     if typeof that.__updateSuggestionsMenu == "function"
-                      @__updateSuggestionsMenu(cdata, 0, searchstring, inputX, suggest_Menu_directInput, searchsuggest_xhr, layout)
+                      @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout)
       inputX.render()
 
       # init suggestmenu
