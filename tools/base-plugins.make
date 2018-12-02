@@ -1,9 +1,13 @@
 WEB = build/webfrontend
+WEBHOOKS = build/webhooks
+
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 L10N2JSON = python2 $(SELF_DIR)/l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
+WEBHOOK_NAME ?= ${PLUGIN_NAME}
+WEBHOOK_JS ?= ${WEBHOOKS}/${WEBHOOK_NAME}.js
 CSS ?= $(WEB)/${PLUGIN_NAME}.css
 L10N = build-stamp-l10n
 
@@ -16,6 +20,10 @@ $(CSS): $(SCSS_FILES)
 	cat $(SCSS_FILES) | $(scss_call) > $(CSS)
 
 ${JS}: $(subst .coffee,.coffee.js,${COFFEE_FILES})
+	mkdir -p $(dir $@)
+	cat $^ > $@
+
+${WEBHOOK_JS}: $(subst .coffee,.coffee.js,${WEBHOOK_FILES})
 	mkdir -p $(dir $@)
 	cat $^ > $@
 
@@ -56,8 +64,9 @@ install-server: ${INSTALL_FILES}
 
 clean-base:
 	rm -f $(L10N) $(subst .coffee,.coffee.js,${COFFEE_FILES}) $(JS) $(SCSS) \
+	rm -f $(subst .coffee,.coffee.js,${WEBHOOK_FILES}) $(WEBHOOK_JS) \
     rm -f $(WEB)/l10n/*.json \
-	rm -f build-stamp-l10n
+	rm -f build-stamp-l10n \
 	rm -rf build
 
 wipe-base: clean-base
