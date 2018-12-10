@@ -63,10 +63,10 @@ install-server: ${INSTALL_FILES}
 	done
 
 clean-base:
-	rm -f $(L10N) $(subst .coffee,.coffee.js,${COFFEE_FILES}) $(JS) $(SCSS) \
-	rm -f $(subst .coffee,.coffee.js,${WEBHOOK_FILES}) $(WEBHOOK_JS) \
-    rm -f $(WEB)/l10n/*.json \
-	rm -f build-stamp-l10n \
+	rm -f $(L10N) $(subst .coffee,.coffee.js,${COFFEE_FILES}) $(JS) $(SCSS)
+	rm -f $(subst .coffee,.coffee.js,${WEBHOOK_FILES}) $(WEBHOOK_JS)
+	rm -f $(WEB)/l10n/*.json
+	rm -f build-stamp-l10n
 	rm -rf build
 
 wipe-base: clean-base
