@@ -1,5 +1,8 @@
 WEB = build/webfrontend
-L10N2JSON := easydb-l10n2json.py
+# L10N2JSON := easydb-l10n2json.py
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+L10N2JSON = python2 $(SELF_DIR)/l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
 L10N = build-stamp-l10n
