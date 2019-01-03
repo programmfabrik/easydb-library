@@ -377,7 +377,7 @@ class CustomDataTypeWithCommons extends CustomDataType
               text: displayURI
               tooltip:
                 markdown: true
-                placement: 'nw'
+                placement: 'w'
                 content: (tooltip) ->
                   # get jskos-details-data
                   encodedURI = encodeURIComponent(cdata.conceptURI)
