@@ -2,7 +2,9 @@
 
 class CustomDataTypeWithCommons extends CustomDataType
 
+  # init data
   initData: (data) ->
+      cloneLogging "f:initData"
       if not data[@name()]
           cdata = {}
           data[@name()] = cdata
@@ -89,9 +91,6 @@ class CustomDataTypeWithCommons extends CustomDataType
           @fullName()+".conceptName"
       ]
 
-      #for lang in ez5.session.getPref("search_languages")
-      #  field_names.push(@fullName()+".text."+lang)
-
       field_names
 
 
@@ -124,7 +123,6 @@ class CustomDataTypeWithCommons extends CustomDataType
           when "token", "fulltext", undefined
               filter =
                   type: "match"
-                  # mode can be fulltext, token or wildcard
                   mode: data[key+":mode"]
                   fields: @getFieldNamesForSearch()
                   string: str
@@ -150,34 +148,14 @@ class CustomDataTypeWithCommons extends CustomDataType
             conceptURI : ''
         }
 
-    @__renderEditorInputPopover(data, data[name])
+    @__renderEditorInputPopover(data, data[name], opts)
 
 
   #######################################################################
-  # buttons, which open and close popover
+  # buttons, which opens and closes popover+menu
   __renderEditorInputPopover: (data, cdata, opts={}) ->
-
     that = @
     layout
-
-    # if treeview?
-    if that.getCustomMaskSettings().editor_style?.value == 'popover_with_treeview'
-      #cdata = {
-      #      conceptName : ''
-      #      conceptURI : ''
-      #}
-      # make searchfield
-
-      # kann das eventuell raus!?!?
-      # oder für extended suche?
-      search_token = new SearchToken
-          column: @
-          data: data
-          fields: opts.fields
-      search_token.element.readOnly = true
-      search_token.element.placeholder = '<--'
-      # disable till further dev...
-      search_token = null
 
     # build layout for editor
     layout = new CUI.HorizontalLayout
@@ -202,7 +180,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               value: 'search'
                               icon_left: new CUI.Icon(class: "fa-search")
                               onClick: (e2, btn2) ->
-                                that.showEditPopover(dotsButton, cdata, layout, search_token)
+                                that.showEditPopover(dotsButton, data, cdata, layout, opts)
                           ]
 
                           if typeof that.__getAdditionalTooltipInfo == "function"
@@ -245,21 +223,20 @@ class CustomDataTypeWithCommons extends CustomDataType
                                     conceptURI : ''
                                 }
                                 data[that.name()] = cdata
-                                that.__updateResult(cdata, layout)
+                                that.__updateResult(cdata, layout, opts)
                           menu_items.push deleteClear
                           itemList =
                             items: menu_items
                       dotsButtonMenu.setItemList(itemList)
                       dotsButtonMenu.show()
                 ]
-    @__updateResult(cdata, layout)
+    @__updateResult(cdata, layout, opts)
     layout
 
 
   #######################################################################
   # show popover and fill it with the form-elements
-  showEditPopover: (btn, cdata, layout) ->
-
+  showEditPopover: (btn, data, cdata, layout, opts) ->
     that = @
 
     suggest_Menu
@@ -273,9 +250,9 @@ class CustomDataTypeWithCommons extends CustomDataType
       data: cdata
       fields: that.__getEditorFields(cdata)
       onDataChanged: (data, elem) =>
-        @__updateResult(cdata, layout)
+        @__updateResult(cdata, layout, opts)
         @__setEditorFieldStatus(cdata, layout)
-        @__updateSuggestionsMenu(cdata, cdata_form, data.searchbarInput, elem, suggest_Menu, searchsuggest_xhr, layout)
+        @__updateSuggestionsMenu(cdata, cdata_form, data.searchbarInput, elem, suggest_Menu, searchsuggest_xhr, layout, opts)
     .start()
 
     # init suggestmenu
@@ -337,6 +314,7 @@ class CustomDataTypeWithCommons extends CustomDataType
           conceptName: cdata.conceptName.trim()
           conceptURI: cdata.conceptURI.trim()
           conceptFulltext: conceptFulltext
+          conceptAncestors: cdata.conceptAncestors
           _fulltext:
                   text: conceptFulltext
                   string: conceptFulltext
@@ -346,7 +324,7 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   #######################################################################
   # update result in Masterform
-  __updateResult: (cdata, layout) ->
+  __updateResult: (cdata, layout, opts) ->
     that = @
     # if field is not empty
     if cdata?.conceptURI
@@ -408,7 +386,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                     # do suggest request and show suggestions
                     searchstring = input.getValueForInput()
                     if typeof that.__updateSuggestionsMenu == "function"
-                      @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout)
+                      @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout, opts)
       inputX.render()
 
       # init suggestmenu
@@ -441,6 +419,10 @@ class CustomDataTypeWithCommons extends CustomDataType
     CUI.Events.trigger
       node: element
       type: "editor-changed"
+
+    CUI.Events.trigger
+      node: element
+      type: "data-changed"
 
     @
 
