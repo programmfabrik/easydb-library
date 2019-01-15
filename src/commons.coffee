@@ -4,7 +4,6 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   # init data
   initData: (data) ->
-      cloneLogging "f:initData"
       if not data[@name()]
           cdata = {}
           data[@name()] = cdata
