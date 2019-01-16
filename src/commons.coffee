@@ -329,14 +329,15 @@ class CustomDataTypeWithCommons extends CustomDataType
     if cdata?.conceptURI
       # die uuid einkürzen..
       displayURI = cdata.conceptURI
-      displayURI = displayURI.replace('http://', '')
-      displayURI = displayURI.replace('https://', '')
-      uriParts = displayURI.split('/')
-      uuid = uriParts.pop()
-      if uuid.length > 10
-        uuid = uuid.substring(0,5) + '…'
-        uriParts.push(uuid)
-        displayURI = uriParts.join('/')
+      if displayURI.length > 20
+        displayURI = displayURI.replace('http://', '')
+        displayURI = displayURI.replace('https://', '')
+        uriParts = displayURI.split('/')
+        uuid = uriParts.pop()
+        if uuid.length > 10
+          uuid = uuid.substring(0,5) + '…'
+          uriParts.push(uuid)
+          displayURI = uriParts.join('/')
 
       info = new CUI.VerticalLayout
         class: 'ez5-info_commonPlugin'
