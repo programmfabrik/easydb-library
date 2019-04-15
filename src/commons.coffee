@@ -246,7 +246,8 @@ class CustomDataTypeWithCommons extends CustomDataType
     # set default value for count of suggestions
     cdata.countOfSuggestions = 20
     cdata_form = new CUI.Form
-      data: cdata
+      class: 'cdtFormWithPadding'
+      data: cdata 
       fields: that.__getEditorFields(cdata)
       onDataChanged: (data, elem) =>
         @__updateResult(cdata, layout, opts)
@@ -491,5 +492,3 @@ class CustomDataTypeCommonFacet extends FieldFacet
       fields: [ @_field.fullName()+".conceptName" ]
       type: "in"
       in: [ obj.term ]
-
-
