@@ -11,13 +11,19 @@ WEBHOOK_JS ?= ${WEBHOOKS}/${WEBHOOK_NAME}.js
 CSS ?= $(WEB)/${PLUGIN_NAME}.css
 L10N = build-stamp-l10n
 
-scss_call = sass --scss --no-cache --sourcemap=inline
+ifeq ($(WEBFRONTEND_SASS),)
+  ifneq ($(shell which sassc),)
+    WEBFRONTEND_SASS=sassc
+  else
+    WEBFRONTEND_SASS=sass
+  endif
+endif
 
 css: $(CSS)
 
 $(CSS): $(SCSS_FILES)
 	mkdir -p $(dir $@)
-	cat $(SCSS_FILES) | $(scss_call) > $(CSS)
+	cat $(SCSS_FILES) | $(WEBFRONTEND_SASS) --stdin > $(CSS)
 
 ${JS}: $(subst .coffee,.coffee.js,${COFFEE_FILES})
 	mkdir -p $(dir $@)
