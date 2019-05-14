@@ -25,6 +25,7 @@
 
 	AliasMatch ^/api/(v1/|)l10n/static/(.*)$ $server_basedir/build/l10n/$2
 	AliasMatch ^/api/(v1/|)xmlmapping/static/(.*)$ $server_basedir/build/xmlmapping/$2
+	AliasMatch ^/api/(v1/|)xmlmapping/tags$ $server_basedir/build/xmlmapping/eas-tags.json
 	AliasMatch ^/api/(v1/|)plugin/static/base/([^/]*)/(.*)$ \
 		$plugins_basedir/$2/build/webfrontend/$3
 	AliasMatch ^/api/(v1/|)plugin/static/solution/([^/]*)/([^/]*)/(.*)$ \
@@ -60,6 +61,7 @@
 		-idle-timeout 3000 -socket $upload_socket
 
 	RewriteCond %{REQUEST_URI} !^/api/(v1/|)(l10n|plugin|xmlmapping)/static
+	RewriteCond %{REQUEST_URI} !^/api/(v1/|)xmlmapping/tags
 	RewriteCond %{REQUEST_URI} !^/api/(v1/|)eas/put
 	RewriteRule ^/api/(v1/|)(.*)$ \
 		$server_basedir/src/imexporter/frontend-${easydb-5-dispatch-$uniqueid:$2:$frontend_medium_socket:$frontend_fast_socket}-$uniqueid [L,NS]
@@ -90,6 +92,12 @@
 		Header set "Access-Control-Allow-Headers" "Authorization, X-Easydb-Token"
 		Header set "Cache-Control" "no-cache,private,must-revalidate"
 	</LocationMatch>
+	<LocationMatch ^/api/(v1/|)xmlmapping/tags>
+		Header set "Access-Control-Allow-Origin" "*"
+		Header set "Access-Control-Allow-Headers" "Authorization, X-Easydb-Token"
+		Header set "Cache-Control" "no-cache,private,must-revalidate"
+	</LocationMatch>
+
 
 	ErrorDocument 404 /cgi-bin/error-handler.sh
 	ErrorDocument 500 /cgi-bin/error-handler.sh
