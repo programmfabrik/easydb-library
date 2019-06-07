@@ -2,38 +2,48 @@
 
 import os
 import sys
-from time import sleep
-from subprocess import Popen, PIPE, STDOUT
-from tempfile import TemporaryFile
+from subprocess import Popen, PIPE
 
 
-def call(node_runner_binary, node_env, parameters):
+def call(config, script, parameters=[], additional_nodepaths=[], logger=None):
 
-    # try:
-    if True:
-        p1 = Popen(
-            node_runner_binary.split(' ') + parameters,
-            shell=False,
-            stdin=None,
-            stdout=PIPE,
-            stderr=STDOUT,
-            env=node_env
-        )
+    node_runner_binary, node_runner_app, node_paths = get_paths(config)
+    if node_runner_binary is None:
+        raise Exception('node_runner_binary_not_found')
+    if node_runner_app is None:
+        raise Exception('node_runner_app_not_found')
 
-        out = u''
-        while True:
-            nextline = p1.stdout.readline()
-            if nextline == '' and p1.poll() is not None:
-                break
-            out += unicode(nextline, encoding='utf-8')
+    command = node_runner_binary.split(' ') + [node_runner_app, script] + parameters
 
-        return out, p1.returncode
+    node_paths += additional_nodepaths
+    node_env = {
+        'NODE_PATH': ':'.join([os.path.abspath(n) for n in node_paths])
+    }
+    if logger is not None:
+        logger.debug('noderunner call: %s' % ' '.join(command))
+        logger.debug('noderunner environment: %s' % node_env)
 
-    # except Exception as e:
-    #     return unicode(e), 1
+    p1 = Popen(
+        command,
+        shell=False,
+        stdin=None,
+        stdout=PIPE,
+        stderr=PIPE,
+        env=node_env
+    )
+
+    out, err = p1.communicate()
+    exit_code = p1.returncode
+
+    if logger is not None:
+        logger.debug('noderunner call: %s bytes from stdout, %s bytes from stderr, exit code: %s' % (len(out), len(err), exit_code))
+        if (exit_code != 0):
+            logger.error('noderunner call: exit code: %s, error: %s' % (exit_code, err))
+
+    return unicode(out, encoding='utf-8'), unicode(err, encoding='utf-8'), exit_code
 
 
-def get_paths(config, plugin=None):
+def get_paths(config):
 
     if not 'system' in config or not 'nodejs' in config['system']:
         return None, None, None
@@ -60,9 +70,4 @@ def get_paths(config, plugin=None):
     else:
         node_path = set(node_modules.split(':'))
 
-    if plugin is not None and 'base_path' in plugin:
-        node_path.add(plugin['base_path'] + '/node_modules')
-
-    return node_runner_binary, node_runner_app, {
-        'NODE_PATH': ':'.join([os.path.abspath(n) for n in node_path])
-    }
+    return node_runner_binary, node_runner_app, list(node_path)
