@@ -12,7 +12,7 @@ SCSS_FILES ?=
 CSS ?= $(WEB)/${PLUGIN_NAME}.scss
 
 export SASS_PATH=.
-scss_call =  sass --scss --no-cache --sourcemap=inline
+scss_call = sass
 
 css: $(CSS)
 

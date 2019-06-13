@@ -11,13 +11,7 @@ WEBHOOK_JS ?= ${WEBHOOKS}/${WEBHOOK_NAME}.js
 CSS ?= $(WEB)/${PLUGIN_NAME}.css
 L10N = build-stamp-l10n
 
-ifeq ($(WEBFRONTEND_SASS),)
-  ifneq ($(shell which sassc),)
-    WEBFRONTEND_SASS=sassc
-  else
-    WEBFRONTEND_SASS=sass
-  endif
-endif
+WEBFRONTEND_SASS ?= sass
 
 css: $(CSS)
 
