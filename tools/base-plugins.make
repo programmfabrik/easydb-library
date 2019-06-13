@@ -17,7 +17,7 @@ css: $(CSS)
 
 $(CSS): $(SCSS_FILES)
 	mkdir -p $(dir $@)
-	cat $(SCSS_FILES) | $(WEBFRONTEND_SASS) --stdin > $(CSS)
+	cat $(SCSS_FILES) | $(WEBFRONTEND_SASS) --stdin > $(CSS) || ( rm -f $(CSS) ; false )
 
 ${JS}: $(subst .coffee,.coffee.js,${COFFEE_FILES})
 	mkdir -p $(dir $@)
