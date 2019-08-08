@@ -155,7 +155,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   __renderEditorInputPopover: (data, cdata, opts={}) ->
     that = @
     layout
-
+    
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: ''
@@ -247,7 +247,7 @@ class CustomDataTypeWithCommons extends CustomDataType
     cdata.countOfSuggestions = 20
     cdata_form = new CUI.Form
       class: 'cdtFormWithPadding'
-      data: cdata 
+      data: cdata
       fields: that.__getEditorFields(cdata)
       onDataChanged: (data, elem) =>
         @__updateResult(cdata, layout, opts)
@@ -326,6 +326,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   # update result in Masterform
   __updateResult: (cdata, layout, opts) ->
     that = @
+    opts.data[that.name(opts)] = cdata
     # if field is not empty
     if cdata?.conceptURI
       # die uuid einkürzen..
@@ -388,7 +389,9 @@ class CustomDataTypeWithCommons extends CustomDataType
                     searchstring = input.getValueForInput()
                     if typeof that.__updateSuggestionsMenu == "function"
                       @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout, opts)
-      inputX.render()
+      # if not called from poolmanagerplugin
+      if ! opts?.callfrompoolmanager
+        inputX.render()
 
       # init suggestmenu
       suggest_Menu_directInput = new CUI.Menu
