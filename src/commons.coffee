@@ -155,7 +155,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   __renderEditorInputPopover: (data, cdata, opts={}) ->
     that = @
     layout
-    
+
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: ''
@@ -316,10 +316,11 @@ class CustomDataTypeWithCommons extends CustomDataType
           conceptFulltext: conceptFulltext
           conceptAncestors: cdata.conceptAncestors
           _fulltext:
-                  text: conceptFulltext
                   string: conceptFulltext
+                  #l10ntext: undefined
           _standard:
                   text: cdata.conceptName.trim()
+                  #l10ntext: undefined
 
 
   #######################################################################
