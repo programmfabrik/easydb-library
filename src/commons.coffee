@@ -158,7 +158,8 @@ class CustomDataTypeWithCommons extends CustomDataType
 
     # build layout for editor
     layout = new CUI.HorizontalLayout
-        class: ''
+        class: 'customPluginEditorLayout'
+        name: 'customPluginEditorLayout'
         center:
           class: ''
         right:
@@ -214,6 +215,8 @@ class CustomDataTypeWithCommons extends CustomDataType
                               #delete / clear
                               text: $$('custom.data.type.commons.controls.delete.label')
                               value: 'delete'
+                              name: 'deleteValueFromDANTEPlugin'
+                              class: 'deleteValueFromDANTEPlugin'
                               icon_left: new CUI.Icon(class: "fa-trash")
                               disabled: that.isEmpty(data, 0, 0)
                               onClick: ->
@@ -223,12 +226,29 @@ class CustomDataTypeWithCommons extends CustomDataType
                                 }
                                 data[that.name()] = cdata
                                 that.__updateResult(cdata, layout, opts)
+                          console.log deleteClear
                           menu_items.push deleteClear
                           itemList =
                             items: menu_items
                       dotsButtonMenu.setItemList(itemList)
                       dotsButtonMenu.show()
                 ]
+    CUI.Events.registerEvent
+      type: "custom-deleteDataFromPlugin"
+      bubble: false
+    CUI.Events.listen
+      type: "custom-deleteDataFromPlugin"
+      instance: @
+      node: layout
+      call: =>
+        console.error "NOW DELETE DARTA!!!!"
+        #cdata = {}
+        cdata = {
+            conceptName : ''
+            conceptURI : ''
+        }
+        data[that.name()] = cdata
+        that.__updateResult(cdata, layout, opts)
     @__updateResult(cdata, layout, opts)
     layout
 
@@ -327,7 +347,8 @@ class CustomDataTypeWithCommons extends CustomDataType
   # update result in Masterform
   __updateResult: (cdata, layout, opts) ->
     that = @
-    opts.data[that.name(opts)] = cdata
+    if opts.data
+      opts.data[that.name(opts)] = cdata
     # if field is not empty
     if cdata?.conceptURI
       # die uuid einkürzen..
