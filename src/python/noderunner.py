@@ -5,7 +5,7 @@ import sys
 from subprocess import Popen, PIPE
 
 
-def call(config, script, parameters=[], additional_nodepaths=[], logger=None):
+def call(config, script, parameters='', additional_nodepaths=[], logger=None):
 
     node_runner_binary, node_runner_app, node_paths = get_paths(config)
     if node_runner_binary is None:
@@ -13,32 +13,35 @@ def call(config, script, parameters=[], additional_nodepaths=[], logger=None):
     if node_runner_app is None:
         raise Exception('node_runner_app_not_found')
 
-    command = node_runner_binary.split(' ') + [node_runner_app, script] + parameters
+    command = node_runner_binary.split(' ') + [node_runner_app, script, '-']
 
     node_paths += additional_nodepaths
     node_env = {
         'NODE_PATH': ':'.join([os.path.abspath(n) for n in node_paths])
     }
+
     if logger is not None:
         logger.debug('noderunner call: %s' % ' '.join(command))
+        logger.debug('noderunner stdin: %s' % parameters)
         logger.debug('noderunner environment: %s' % node_env)
 
     p1 = Popen(
         command,
         shell=False,
-        stdin=None,
+        stdin=PIPE,
         stdout=PIPE,
         stderr=PIPE,
         env=node_env
     )
 
-    out, err = p1.communicate()
+    out, err = p1.communicate(input=parameters)
     exit_code = p1.returncode
 
     if logger is not None:
-        logger.debug('noderunner call: %s bytes from stdout, %s bytes from stderr, exit code: %s' % (len(out), len(err), exit_code))
+        logger.debug('noderunner call: %s bytes from stdout, %s bytes from stderr, exit code: %s ==> %s'
+            % (len(out), len(err), exit_code, 'OK' if exit_code == 0 else 'ERROR'))
         if (exit_code != 0):
-            logger.error('noderunner call: exit code: %s, error: %s' % (exit_code, err))
+            logger.error('noderunner call: exit code: %s, error: %s, out: %s' % (exit_code, err, out))
 
     return unicode(out, encoding='utf-8'), unicode(err, encoding='utf-8'), exit_code
 
