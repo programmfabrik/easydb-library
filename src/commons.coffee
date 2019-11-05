@@ -321,10 +321,16 @@ class CustomDataTypeWithCommons extends CustomDataType
 
       when "ok"
 
-        # was _fulltext already set by plugin?
+        # if fulltext is already set, leave it, else set conceptName
         conceptFulltext = ''
-        if cdata?.conceptFulltext
-          conceptFulltext = cdata.conceptFulltext
+        if cdata?._fulltext
+          if cdata._fulltext?.string
+            if cdata._fulltext.string != ''
+              conceptFulltext = cdata._fulltext.string
+            else
+              conceptFulltext = cdata.conceptName.trim()
+          else
+            conceptFulltext = cdata.conceptName.trim()
         else
           conceptFulltext = cdata.conceptName.trim()
 
