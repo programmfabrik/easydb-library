@@ -233,6 +233,8 @@ class CustomDataTypeWithCommons extends CustomDataType
                       dotsButtonMenu.setItemList(itemList)
                       dotsButtonMenu.show()
                 ]
+
+    # other plugins can trigger layout-rebuild by deletion of data-value
     CUI.Events.registerEvent
       type: "custom-deleteDataFromPlugin"
       bubble: false
@@ -241,13 +243,10 @@ class CustomDataTypeWithCommons extends CustomDataType
       instance: @
       node: layout
       call: =>
-        console.error "NOW DELETE DARTA!!!!"
-        #cdata = {}
-        cdata = {
-            conceptName : ''
-            conceptURI : ''
-        }
+        console.error "NOW DELETE DATA!!!!"
+        cdata = {}
         data[that.name()] = cdata
+        opts.deleteDataFromPlugin = true
         that.__updateResult(cdata, layout, opts)
     @__updateResult(cdata, layout, opts)
     layout
@@ -429,8 +428,10 @@ class CustomDataTypeWithCommons extends CustomDataType
         class: ''
       layout.__initPane(options, 'center')
 
-    # did data change?
-    that.__setEditorFieldStatus(cdata, layout)
+    # if deleted from another plugin, do NOT trigger, because that could lead in an endless loop
+    if ! opts.deleteDataFromPlugin
+      # did data change?
+      that.__setEditorFieldStatus(cdata, layout)
 
 
   #######################################################################
