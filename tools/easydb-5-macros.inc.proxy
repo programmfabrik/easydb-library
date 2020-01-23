@@ -49,6 +49,7 @@
 	RewriteCond %{REQUEST_URI} !^/exec-php
 	RewriteCond %{REQUEST_URI} !^/test
 	RewriteCond %{REQUEST_URI} !^/upload
+	RewriteCond %{REQUEST_URI} !^/external
 	RewriteRule ^.*$ $webfrontend_basedir/build/index.html [QSA]
 
 # 	FastCgiExternalServer $server_basedir/src/imexporter/frontend-s-$uniqueid \
