@@ -23,6 +23,17 @@ if not os.path.exists(directory):
 cultures = []
 cultures_plain = []
 
+def getCultureValue(_row, _culture, i = 0):
+    _value = _row[_culture]
+    if _value == None or _value == '':
+        if i >= len(cultures_plain):
+            return ""
+        nextCulture = cultures_plain[i]
+        i += 1
+        return getCultureValue(_row, nextCulture, i)
+    return _value.strip()
+
+
 for idx in range(1, len(sys.argv)-1):
     print "#"+str(idx), sys.argv[idx]
 
@@ -54,10 +65,7 @@ for idx in range(1, len(sys.argv)-1):
 
                     target_dict[culture] = {}
 
-                if row[culture] == None:
-                    target_dict[culture][loca_key] = ""
-                else:
-                    target_dict[culture][loca_key] = row[culture].strip()
+                target_dict[culture][loca_key] = getCultureValue(row, culture)
             line = line + 1
 
 for culture, loca_keys in target_dict.iteritems():
