@@ -23,6 +23,8 @@ if not os.path.exists(directory):
 cultures = []
 cultures_plain = []
 
+EN_US_CULTURE = "en-US"
+
 def getCultureValue(_row, _culture, i = 0):
     _value = _row[_culture]
     if _value == None or _value == '':
@@ -48,6 +50,8 @@ for idx in range(1, len(sys.argv)-1):
             else:
                 cultures.append({"code": culture})
                 cultures_plain.append(culture)
+
+        cultures_plain = sorted(cultures_plain, key=lambda item: 0 if item == EN_US_CULTURE else 1)
 
         line = 1 # the first line was skipped as it is contains the keys for the dict
         for row in reader:
