@@ -57,6 +57,9 @@ for idx in range(1, len(sys.argv)-1):
         for row in reader:
 
             loca_key = row["key"].strip()
+            if loca_key == None or loca_key == '':
+                continue
+
             for culture in row.keys():
                 if culture not in cultures_plain:
                     continue
