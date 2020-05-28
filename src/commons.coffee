@@ -159,7 +159,7 @@ class CustomDataTypeWithCommons extends CustomDataType
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: 'customPluginEditorLayout'
-        name: 'customPluginEditorLayout'
+        #name: 'customPluginEditorLayout'
         center:
           class: ''
         right:
@@ -226,7 +226,6 @@ class CustomDataTypeWithCommons extends CustomDataType
                                 }
                                 data[that.name()] = cdata
                                 that.__updateResult(cdata, layout, opts)
-                          console.log deleteClear
                           menu_items.push deleteClear
                           itemList =
                             items: menu_items
@@ -243,7 +242,6 @@ class CustomDataTypeWithCommons extends CustomDataType
       instance: @
       node: layout
       call: =>
-        console.error "NOW DELETE DATA!!!!"
         cdata = {}
         data[that.name()] = cdata
         opts.deleteDataFromPlugin = true
@@ -321,32 +319,35 @@ class CustomDataTypeWithCommons extends CustomDataType
 
       when "ok"
 
-        # if fulltext is already set, leave it, else set conceptName
-        conceptFulltext = ''
+        # if _fulltext is already set, leave it, else set conceptName
+        conceptFulltext = {}
+        conceptFulltext.string = cdata.conceptName.trim()
         if cdata?._fulltext
           if cdata._fulltext?.string
-            if cdata._fulltext.string != ''
-              conceptFulltext = cdata._fulltext.string
-            else
-              conceptFulltext = cdata.conceptName.trim()
-          else
-            conceptFulltext = cdata.conceptName.trim()
-        else
-          conceptFulltext = cdata.conceptName.trim()
+            if cdata._fulltext?.string != ''
+              conceptFulltext.string = cdata._fulltext.string
+          if cdata._fulltext?.l10ntext
+            if cdata._fulltext.l10ntext
+              conceptFulltext.l10ntext = cdata._fulltext.l10ntext
+
+        # if _standard is already set, leave it
+        conceptStandard = {}
+        conceptStandard.string = cdata.conceptName.trim()
+        if cdata?._standard
+          if cdata._standard?.string
+            if cdata._standard?.string != ''
+              conceptStandard.string = cdata._standard.string
+          if cdata._standard?.l10ntext
+            if cdata._standard.l10ntext
+              conceptStandard.l10ntext = cdata._standard.l10ntext
 
         # build savedata
         save_data[@name()] =
           conceptName: cdata.conceptName.trim()
           conceptURI: cdata.conceptURI.trim()
-          conceptFulltext: conceptFulltext
           conceptAncestors: cdata.conceptAncestors
-          _fulltext:
-                  string: conceptFulltext
-                  #l10ntext: undefined
-          _standard:
-                  text: cdata.conceptName.trim()
-                  #l10ntext: undefined
-
+          _fulltext: conceptFulltext
+          _standard: conceptStandard
 
   #######################################################################
   # update result in Masterform
