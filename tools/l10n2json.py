@@ -22,10 +22,8 @@ if not os.path.exists(directory):
 
 cultures = []
 cultures_plain = []
-cultures_fallback = []
 
 EN_US_CULTURE = "en-US"
-FALLBACK_SUFFIX = "-key-fallback"
 
 def getCultureValue(_row, _culture, i = 0):
     _value = _row[_culture]
@@ -38,13 +36,6 @@ def getCultureValue(_row, _culture, i = 0):
     return _value.strip()
 
 
-def getCultureValueWithFallback(_row, _culture, _key, i = 0):
-    _value = _row[_culture]
-    if _value == None or _value == '':
-        return _key
-    return _value.strip()
-
-
 for idx in range(1, len(sys.argv)-1):
     print "#"+str(idx), sys.argv[idx]
 
@@ -54,17 +45,13 @@ for idx in range(1, len(sys.argv)-1):
         for culture in reader.fieldnames:
             if culture == "key":
                 continue
-            elif re.match(r"[a-z]{2}\-[A-Z]{2}", culture) == None:
+            elif re.match("[a-z]{2}\-[A-Z]{2}", culture) == None:
                 print "Omitting column \""+culture+"\", culture format \"az-AZ\" not matching."
             else:
                 cultures.append({"code": culture})
                 cultures_plain.append(culture)
 
         cultures_plain = sorted(cultures_plain, key=lambda item: 0 if item == EN_US_CULTURE else 1)
-        for culture in cultures_plain:
-            key_fallback_culture = "%s%s" % (culture, FALLBACK_SUFFIX)
-            cultures.append({"code": key_fallback_culture})
-            cultures_fallback.append(key_fallback_culture)
 
         line = 1 # the first line was skipped as it is contains the keys for the dict
         for row in reader:
@@ -74,10 +61,8 @@ for idx in range(1, len(sys.argv)-1):
                 continue
 
             for culture in row.keys():
-                if culture not in cultures_plain and culture not in cultures_fallback:
+                if culture not in cultures_plain:
                     continue
-
-                key_fallback_culture = "%s%s" % (culture, FALLBACK_SUFFIX)
 
                 if not culture in target_dict:
                     if culture == None:
@@ -86,11 +71,8 @@ for idx in range(1, len(sys.argv)-1):
                         continue
 
                     target_dict[culture] = {}
-                    target_dict[key_fallback_culture] = {}
 
                 target_dict[culture][loca_key] = getCultureValue(row, culture)
-                target_dict[key_fallback_culture][loca_key] = getCultureValueWithFallback(row, culture, loca_key)
-
             line = line + 1
 
 for culture, loca_keys in target_dict.iteritems():
@@ -106,4 +88,4 @@ for culture, loca_keys in target_dict.iteritems():
 filename = directory+"/cultures.json"
 with open(filename, 'w') as outfile:
     json.dump(cultures, outfile, ensure_ascii=False, sort_keys=True, indent=4)
-    print "Wrote", filename, "with", repr(cultures_plain + cultures_fallback)
+    print "Wrote", filename, "with", repr(cultures_plain)
