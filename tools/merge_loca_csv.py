@@ -17,8 +17,8 @@ argparser.add_argument('merge', metavar='merge',
 required = argparser.add_argument_group('required arguments')
 required.add_argument('-k', '--key', type=str, required=True, metavar='key',
                       help='[Example: -k key] key column name for merging')
-required.add_argument('-m', '--merge-columns', nargs='+', type=str, required=True, metavar='merge_columns',
-                      help='[Example: -m=ru-RU,pl-PL] columns from merge that should be merged into master. must be in both master and merge.')
+required.add_argument('-m', '--merge-columns', type=str, required=True, metavar='merge_columns',
+                      help='[Example: -m=ru-RU,pl-PL] string with comma separated columns from merge csv that should be merged into master. must be in both master and merge csv files.')
 
 argparser.add_argument('-f', '--set-key-fallback',
                        help='fallback column for missing entries, must be in master csv')
@@ -35,11 +35,10 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     _merge_columns = set()
-    for a in args.merge_columns:
-        for b in a.split(','):
-            b = b.strip()
-            if len(b) > 0:
-                _merge_columns.add(b)
+    for a in args.merge_columns.split(','):
+        a = a.strip()
+        if len(a) > 0:
+            _merge_columns.add(a)
 
     _merge_columns = list(_merge_columns)
 
