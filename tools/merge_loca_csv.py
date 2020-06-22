@@ -132,13 +132,13 @@ if __name__ == "__main__":
             _master_value = d['_row'][i]
 
             # value neither in master nor in merge -> key fallback
-            if len(_master_value) < 1 and len(_merge_value) < 1:
+            if (_master_value is None or len(_master_value) < 1) and (_merge_value is None or len(_merge_value) < 1):
                 if fallback_column == args.key:
                     # use key as fallback
                     d['_row'][i] = _loca_key
                 elif fallback_column is not None:
                     # use value from callback column
-                    d['_row'][i] = _master_value
+                    d['_row'][i] = _master_value if _master_value is not None else ''
 
             # value is in master and in merge -> merge value
             else:
