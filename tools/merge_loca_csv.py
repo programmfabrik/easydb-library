@@ -5,6 +5,7 @@ import sys
 import csv
 import re
 import argparse
+import json
 
 argparser = argparse.ArgumentParser()
 
@@ -14,10 +15,10 @@ argparser.add_argument('merge', metavar='merge',
                        type=str, help='merge l10n csv file')
 
 required = argparser.add_argument_group('required arguments')
-required.add_argument('-k', '--key', type=str, required=True,
-                      help='key column name for merging')
-required.add_argument('-m', '--merge-columns', nargs='+', type=str, required=True,
-                      help='columns from merge that should be merged into master. must be present in both master and merge')
+required.add_argument('-k', '--key', type=str, required=True, metavar='key',
+                      help='[Example: -k key] key column name for merging')
+required.add_argument('-m', '--merge-columns', nargs='+', type=str, required=True, metavar='merge_columns',
+                      help='[Example: -m=ru-RU,pl-PL] columns from merge that should be merged into master. must be in both master and merge.')
 
 argparser.add_argument('-f', '--set-key-fallback',
                        help='fallback column for missing entries, must be in master csv')
@@ -33,9 +34,14 @@ if __name__ == "__main__":
 
     args = argparser.parse_args()
 
-    _merge_columns = [
-        c.strip() for c in args.merge_columns if len(c.strip()) > 0
-    ]
+    _merge_columns = set()
+    for a in args.merge_columns:
+        for b in a.split(','):
+            b = b.strip()
+            if len(b) > 0:
+                _merge_columns.add(b)
+
+    _merge_columns = list(_merge_columns)
 
     if len(_merge_columns) < 1:
         to_stderr("'--merge-columns' must be list of valid column names")
