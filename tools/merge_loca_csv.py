@@ -22,12 +22,29 @@ required.add_argument('-m', '--merge-columns', type=str, required=True, metavar=
 
 argparser.add_argument('-f', '--set-key-fallback',
                        help='fallback column for missing entries, must be in master csv')
+argparser.add_argument('-s', '--sort', action='store_true',
+                       help='sort keys alphabetically in output csv')
+
+KEY_INTERNAL = '_key'
+ROW_INTERNAL = '_row'
 
 
 def to_stderr(line, _exit=True):
     sys.stderr.write(str(line) + "\n")
     if _exit:
         exit(1)
+
+
+def sort_keys(x, y):
+    if KEY_INTERNAL not in x:
+        return 0
+    if KEY_INTERNAL not in y:
+        return 0
+    if x[KEY_INTERNAL] == y[KEY_INTERNAL]:
+        return 0
+    if x[KEY_INTERNAL] > y[KEY_INTERNAL]:
+        return 1
+    return -1
 
 
 if __name__ == "__main__":
@@ -50,6 +67,7 @@ if __name__ == "__main__":
 
     _master_columns = []
     _master_keys = set()
+    _merge_keys = set()
 
     is_master_file = True
     for csvfilename in [args.master, args.merge]:
@@ -85,6 +103,8 @@ if __name__ == "__main__":
 
                 if is_master_file:
                     _master_keys.add(_loca_key)
+                else:
+                    _merge_keys.add(_loca_key)
 
                 for fieldname in reader.fieldnames:
                     if is_master_file:
@@ -98,11 +118,19 @@ if __name__ == "__main__":
 
                 if is_master_file:
                     _master_csv_data.append({
-                        '_key': _loca_key,
-                        '_row': _row_data
+                        KEY_INTERNAL: _loca_key,
+                        ROW_INTERNAL: _row_data
                     })
 
         is_master_file = False
+
+    for _loca_key in _merge_keys:
+        if not _loca_key in _master_keys:
+            to_stderr('missing in master: %s' % _loca_key, False)
+
+    for _loca_key in _master_keys:
+        if not _loca_key in _merge_keys:
+            to_stderr('missing in merge: %s' % _loca_key, False)
 
     fallback_column = None
     if args.set_key_fallback is not None:
@@ -115,44 +143,47 @@ if __name__ == "__main__":
 
     # merge all key values from merge csv into master csv
     for d in _master_csv_data:
-        if not '_key' in d or not '_row' in d:
+        if not KEY_INTERNAL in d or not ROW_INTERNAL in d:
             continue
-        if len(d['_key']) < 1:
+        if len(d[KEY_INTERNAL]) < 1:
             continue
 
-        _loca_key = d['_key']
+        _loca_key = d[KEY_INTERNAL]
         if not _loca_key in _merge_csv_data:
             continue
 
         _key_data = _merge_csv_data[_loca_key]
 
         for i in range(len(_master_columns)):
-            if i >= len(d['_row']):
+            if i >= len(d[ROW_INTERNAL]):
                 continue
             _col = _master_columns[i]
             if not _col in _key_data:
                 continue
 
             _merge_value = _key_data[_col]
-            _master_value = d['_row'][i]
+            _master_value = d[ROW_INTERNAL][i]
 
             # value neither in master nor in merge -> key fallback
             if (_master_value is None or len(_master_value) < 1) and (_merge_value is None or len(_merge_value) < 1):
                 if fallback_column == args.key:
                     # use key as fallback
-                    d['_row'][i] = _loca_key
+                    d[ROW_INTERNAL][i] = _loca_key
                 elif fallback_column is not None:
                     # use value from callback column
-                    d['_row'][i] = _master_value if _master_value is not None else ''
+                    d[ROW_INTERNAL][i] = _master_value if _master_value is not None else ''
 
             # value is in master and in merge -> merge value
             else:
-                d['_row'][i] = _merge_value
+                d[ROW_INTERNAL][i] = _merge_value
+
+    if args.sort:
+        _master_csv_data.sort(cmp=sort_keys)
 
     writer = csv.writer(sys.stdout, delimiter=',', quotechar='"')
     writer.writerow(_master_columns)
 
     for row in _master_csv_data:
-        if not '_row' in row:
+        if not ROW_INTERNAL in row:
             continue
-        writer.writerow(row['_row'])
+        writer.writerow(row[ROW_INTERNAL])
