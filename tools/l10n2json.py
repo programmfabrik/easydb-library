@@ -23,6 +23,19 @@ if not os.path.exists(directory):
 cultures = []
 cultures_plain = []
 
+EN_US_CULTURE = "en-US"
+
+def getCultureValue(_row, _culture, i = 0):
+    _value = _row[_culture]
+    if _value == None or _value == '':
+        if i >= len(cultures_plain):
+            return ""
+        nextCulture = cultures_plain[i]
+        i += 1
+        return getCultureValue(_row, nextCulture, i)
+    return _value.strip()
+
+
 for idx in range(1, len(sys.argv)-1):
     print "#"+str(idx), sys.argv[idx]
 
@@ -38,10 +51,15 @@ for idx in range(1, len(sys.argv)-1):
                 cultures.append({"code": culture})
                 cultures_plain.append(culture)
 
+        cultures_plain = sorted(cultures_plain, key=lambda item: 0 if item == EN_US_CULTURE else 1)
+
         line = 1 # the first line was skipped as it is contains the keys for the dict
         for row in reader:
 
             loca_key = row["key"].strip()
+            if loca_key == None or loca_key == '':
+                continue
+
             for culture in row.keys():
                 if culture not in cultures_plain:
                     continue
@@ -54,10 +72,7 @@ for idx in range(1, len(sys.argv)-1):
 
                     target_dict[culture] = {}
 
-                if row[culture] == None:
-                    target_dict[culture][loca_key] = ""
-                else:
-                    target_dict[culture][loca_key] = row[culture].strip()
+                target_dict[culture][loca_key] = getCultureValue(row, culture)
             line = line + 1
 
 for culture, loca_keys in target_dict.iteritems():

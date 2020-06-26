@@ -49,6 +49,7 @@
 	RewriteCond %{REQUEST_URI} !^/exec-php
 	RewriteCond %{REQUEST_URI} !^/test
 	RewriteCond %{REQUEST_URI} !^/upload
+	RewriteCond %{REQUEST_URI} !^/external
 	RewriteRule ^.*$ $webfrontend_basedir/build/index.html [QSA]
 
 # 	FastCgiExternalServer $server_basedir/src/imexporter/frontend-s-$uniqueid \
@@ -69,7 +70,7 @@
 	RewriteCond %{REQUEST_URI} !^/api/(v1/|)xmlmapping/tags
 	RewriteCond %{REQUEST_URI} !^/api/(v1/|)eas/put
 	RewriteRule ^/api/(v1/|)(.*)$ \
-		/server-fcgi-frontend-${easydb-5-dispatch-$uniqueid:$2:$frontend_medium_socket:$frontend_fast_socket}-$uniqueid [PT,E=QUERY_STRING:/$1$2,E=PATH_INFO:/$1$2,E=SCRIPT_NAME:/api/$1$2]
+		/server-fcgi-frontend-${easydb-5-dispatch-$uniqueid:$2:$frontend_medium_socket:$frontend_fast_socket}-$uniqueid/api/$1$2 [PT,E=QUERY_STRING:/$1$2,E=PATH_INFO:/$1$2,E=SCRIPT_NAME:/api/$1$2]
 
 	ProxyFCGISetEnvIf "true" SCRIPT_NAME "/api%{env:PATH_INFO}"
 	ProxyPass /server-fcgi-frontend-s-$uniqueid "unix:$frontend_slow_socket|fcgi://localhost/server/s-$identifier"
