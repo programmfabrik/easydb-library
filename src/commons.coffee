@@ -263,7 +263,7 @@ class CustomDataTypeWithCommons extends CustomDataType
     searchsuggest_xhr = { "xhr" : undefined }
 
     # set default value for count of suggestions
-    cdata.countOfSuggestions = 20
+    cdata.countOfSuggestions = 50
     cdata_form = new CUI.Form
       class: 'cdtFormWithPadding'
       data: cdata
