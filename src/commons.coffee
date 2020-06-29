@@ -173,6 +173,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                     # show "dots"-menu on click on 3 vertical dots
                     onClick: (e, dotsButton) =>
                       dotsButtonMenu = new CUI.Menu
+                          class: "customDataTypeCommonsMenu" 
                           element : dotsButton
                           menu_items = [
                               #search
@@ -274,8 +275,9 @@ class CustomDataTypeWithCommons extends CustomDataType
 
     # init suggestmenu
     suggest_Menu = new CUI.Menu
-        element : cdata_form.getFieldsByName("searchbarInput")[0]
+        element: cdata_form.getFieldsByName("searchbarInput")[0]
         use_element_width_as_min_width: true
+        class: "customDataTypeCommonsMenu"
 
     @popover = new CUI.Popover
       element: btn
@@ -425,6 +427,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       suggest_Menu_directInput = new CUI.Menu
           element : inputX
           use_element_width_as_min_width: true
+          class: "customDataTypeCommonsMenu"
 
       # init xhr-object to abort running xhrs
       searchsuggest_xhr = { "xhr" : undefined }
