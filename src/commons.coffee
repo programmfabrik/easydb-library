@@ -302,6 +302,9 @@ class CustomDataTypeWithCommons extends CustomDataType
   #######################################################################
   # is called, when record is being saved by user
   getSaveData: (data, save_data, opts) ->
+
+    that = @
+
     if opts.demo_data
       return {
         conceptName : 'Example'
@@ -333,7 +336,7 @@ class CustomDataTypeWithCommons extends CustomDataType
               conceptFulltext.l10ntext = cdata._fulltext.l10ntext
           if cdata._fulltext?.text
             if cdata._fulltext.text
-              conceptFulltext.text = cdata._fulltext.text              
+              conceptFulltext.text = cdata._fulltext.text
 
         # if _standard is already set, leave it
         conceptStandard = {}
@@ -346,13 +349,33 @@ class CustomDataTypeWithCommons extends CustomDataType
             if cdata._standard.l10ntext
               conceptStandard.l10ntext = cdata._standard.l10ntext
 
+	       # save the frontend-language (display-purposes)
+        frontendLanguages = ez5.loca.getLanguage()
+        frontendLanguages = frontendLanguages.split('-')
+        frontendLanguage = frontendLanguages[0]
+
+        # save the eventually manual chosen label
+        conceptNameChosenByHand = false
+        if cdata?.conceptNameChosenByHand
+          if cdata.conceptNameChosenByHand == true
+            conceptNameChosenByHand = true
+
         # build savedata
         save_data[@name()] =
           conceptName: cdata.conceptName.trim()
           conceptURI: cdata.conceptURI.trim()
-          conceptAncestors: cdata.conceptAncestors
+          frontendLanguage: frontendLanguage
           _fulltext: conceptFulltext
           _standard: conceptStandard
+
+        # hierarchical ancestors
+        if cdata?.conceptAncestors
+          if cdata.conceptAncestors.length > 0
+            save_data[@name()]['conceptAncestors'] = cdata.conceptAncestors
+
+        if cdata?.conceptNameChosenByHand
+          if cdata.conceptNameChosenByHand == true
+            save_data[@name()]['conceptNameChosenByHand'] = true
 
   #######################################################################
   # update result in Masterform
@@ -367,12 +390,9 @@ class CustomDataTypeWithCommons extends CustomDataType
       if displayURI.length > 20
         displayURI = displayURI.replace('http://', '')
         displayURI = displayURI.replace('https://', '')
-        uriParts = displayURI.split('/')
-        uuid = uriParts.pop()
-        if uuid.length > 10
-          uuid = uuid.substring(0,5) + '…'
-          uriParts.push(uuid)
-          displayURI = uriParts.join('/')
+      if displayURI.length > 30
+        displayURI = displayURI.replace('uri.gbv.de/terminology/', '…/')
+
 
       info = new CUI.VerticalLayout
         class: 'ez5-info_commonPlugin'
