@@ -173,7 +173,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                     # show "dots"-menu on click on 3 vertical dots
                     onClick: (e, dotsButton) =>
                       dotsButtonMenu = new CUI.Menu
-                          class: "customDataTypeCommonsMenu" 
+                          class: "customDataTypeCommonsMenu"
                           element : dotsButton
                           menu_items = [
                               #search
@@ -331,6 +331,9 @@ class CustomDataTypeWithCommons extends CustomDataType
           if cdata._fulltext?.l10ntext
             if cdata._fulltext.l10ntext
               conceptFulltext.l10ntext = cdata._fulltext.l10ntext
+          if cdata._fulltext?.text
+            if cdata._fulltext.text
+              conceptFulltext.text = cdata._fulltext.text              
 
         # if _standard is already set, leave it
         conceptStandard = {}
