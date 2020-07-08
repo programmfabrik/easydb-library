@@ -159,7 +159,6 @@ class CustomDataTypeWithCommons extends CustomDataType
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: 'customPluginEditorLayout'
-        #name: 'customPluginEditorLayout'
         center:
           class: ''
         right:
@@ -182,6 +181,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               icon_left: new CUI.Icon(class: "fa-search")
                               onClick: (e2, btn2) ->
                                 that.showEditPopover(dotsButton, data, cdata, layout, opts)
+                                dotsButtonMenu.hide()
                           ]
 
                           if typeof that.__getAdditionalTooltipInfo == "function"
@@ -191,17 +191,31 @@ class CustomDataTypeWithCommons extends CustomDataType
                               value: 'detail'
                               icon_left: new CUI.Icon(class: "fa-info-circle")
                               disabled: that.isEmpty(data, 0, 0)
-                              tooltip:
-                                markdown: true
-                                placement: 'w'
-                                content: (tooltip) ->
-                                  if !that.isEmpty(data, 0, 0)
-                                    # get jskos-details-data
-                                    encodedURI = encodeURIComponent(cdata.conceptURI)
-                                    extendedInfo_xhr = { "xhr" : undefined }
-                                    that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
-                                    # loader, until details are xhred
-                                    new CUI.Label(icon: "spinner", text: $$('custom.data.type.commons.modal.form.popup.loadingstring'))
+                              onClick: (eDetailInfo, btnDetailInfo) ->
+                                tooltip = new CUI.Tooltip
+                                  element: btnDetailInfo
+                                  placement: 'w'
+                                  markdown: true
+                                  show_ms: 1000
+                                  hide_ms: 200
+                                  content: (tooltip) ->
+                                    if !that.isEmpty(data, 0, 0)
+                                      # get jskos-details-data
+                                      encodedURI = encodeURIComponent(cdata.conceptURI)
+                                      extendedInfo_xhr = { "xhr" : undefined }
+                                      that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
+                                      # loader, until details are xhred
+                                      new CUI.Label(icon: "spinner", text: $$('custom.data.type.commons.modal.form.popup.loadingstring'))
+                                tooltip.show()
+                                # hide tooltip + menu on mouseaction
+                                CUI.Events.listen
+                                  type: ["click", "dblclick", "mouseout"]
+                                  capture: true
+                                  node: btnDetailInfo
+                                  only_once: true
+                                  call: (ev) =>
+                                    dotsButtonMenu.hide()
+
                             menu_items.push detailinfo
                           uriCall =
                               # call uri
@@ -211,6 +225,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               disabled: that.isEmpty(data, 0, 0) || ! CUI.parseLocation(cdata.conceptURI)
                               onClick: ->
                                 window.open cdata.conceptURI, "_blank"
+                                dotsButtonMenu.hide()
                           menu_items.push uriCall
                           deleteClear =
                               #delete / clear
@@ -227,9 +242,11 @@ class CustomDataTypeWithCommons extends CustomDataType
                                 }
                                 data[that.name()] = cdata
                                 that.__updateResult(cdata, layout, opts)
+                                dotsButtonMenu.hide()
                           menu_items.push deleteClear
                           itemList =
                             items: menu_items
+                      dotsButtonMenu._auto_close_after_click = false
                       dotsButtonMenu.setItemList(itemList)
                       dotsButtonMenu.show()
                 ]
@@ -340,11 +357,11 @@ class CustomDataTypeWithCommons extends CustomDataType
 
         # if _standard is already set, leave it
         conceptStandard = {}
-        conceptStandard.string = cdata.conceptName.trim()
+        conceptStandard.text = cdata.conceptName.trim()
         if cdata?._standard
-          if cdata._standard?.string
-            if cdata._standard?.string != ''
-              conceptStandard.string = cdata._standard.string
+          if cdata._standard?.text
+            if cdata._standard?.text != ''
+              conceptStandard.text = cdata._standard.text
           if cdata._standard?.l10ntext
             if cdata._standard.l10ntext
               conceptStandard.l10ntext = cdata._standard.l10ntext
