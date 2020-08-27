@@ -343,7 +343,6 @@ class CustomDataTypeWithCommons extends CustomDataType
 
         # if _fulltext is already set, leave it, else set conceptName
         conceptFulltext = {}
-        conceptFulltext.string = cdata.conceptName.trim()
         if cdata?._fulltext
           if cdata._fulltext?.string
             if cdata._fulltext?.string != ''
@@ -354,17 +353,23 @@ class CustomDataTypeWithCommons extends CustomDataType
           if cdata._fulltext?.text
             if cdata._fulltext.text
               conceptFulltext.text = cdata._fulltext.text
+        else
+          conceptFulltext.text = cdata.conceptName.trim()
 
         # if _standard is already set, leave it
         conceptStandard = {}
-        conceptStandard.text = cdata.conceptName.trim()
         if cdata?._standard
-          if cdata._standard?.text
-            if cdata._standard?.text != ''
-              conceptStandard.text = cdata._standard.text
           if cdata._standard?.l10ntext
             if cdata._standard.l10ntext
               conceptStandard.l10ntext = cdata._standard.l10ntext
+          else
+            # only set .text, if l10ntext is not set (else easydb-error!)
+            if cdata._standard?.text
+              if cdata._standard?.text != ''
+                conceptStandard.text = cdata._standard.text
+        #else
+        #  conceptStandard.text = cdata.conceptName.trim() # (else easydb-error!)
+
 
 	       # save the frontend-language (display-purposes)
         frontendLanguages = ez5.loca.getLanguage()
