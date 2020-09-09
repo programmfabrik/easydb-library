@@ -255,9 +255,10 @@ class CustomDataTypeWithCommons extends CustomDataType
     CUI.Events.registerEvent
       type: "custom-deleteDataFromPlugin"
       bubble: false
+
     CUI.Events.listen
       type: "custom-deleteDataFromPlugin"
-      instance: @
+      instance: that
       node: layout
       call: =>
         cdata = {}
