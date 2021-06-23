@@ -312,8 +312,11 @@ class CustomDataTypeWithCommons extends CustomDataType
   # check if field is empty
   isEmpty: (data, top_level_data, opts={}) ->
       if opts?.mode == "expert"
-          # check plain input in search
-          return CUI.util.isEmpty(data[@name()]?.trim())
+          # check input in expert search
+          if typeof data[@name()] == 'object'
+            return CUI.util.isEmpty(data[@name()]?)
+          else
+            return CUI.util.isEmpty(data[@name()]?.trim())
 
       return not data[@name()]?.conceptName
 
