@@ -32,6 +32,18 @@ build-stamp-l10n: $(L10N_FILES)
 	$(L10N2JSON) $(L10N_FILES) $(WEB)/l10n
 	touch $@
 
+buildinfojson:
+	repo=`git remote get-url origin | sed -e 's/\.git$$//' -e 's#.*[/\\]##'` ;\
+	rev=`git show --no-patch --format=%H` ;\
+	lastchanged=`git show --no-patch --format=%aI` ;\
+	builddate=`date --iso-8601=seconds` ;\
+	echo '{' > build-info.json ;\
+	echo '  "repository": "'$$repo'",' >> build-info.json ;\
+	echo '  "rev": "'$$rev'",' >> build-info.json ;\
+	echo '  "lastchanged": "'$$lastchanged'",' >> build-info.json ;\
+	echo '  "builddate": "'$$builddate'"' >> build-info.json ;\
+	echo '}' >> build-info.json
+
 %.coffee.js: %.coffee
 	coffee -b -p --compile "$^" > "$@" || ( rm -f "$@" ; false )
 
@@ -61,6 +73,9 @@ install-server: ${INSTALL_FILES}
 			cp $$f ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}/$$f; \
 		fi; \
 	done
+	if [ -f "build-info.json" ]; then \
+		cp "build-info.json" "${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}/build-info.json"; \
+	fi
 
 clean-base:
 	rm -f $(L10N) $(subst .coffee,.coffee.js,${COFFEE_FILES}) $(JS) $(SCSS)
@@ -72,6 +87,6 @@ clean-base:
 wipe-base: clean-base
 	find . -name '*~' -or -name '#*#' | xargs rm -f
 
-.PHONY: all build clean clean-base wipe-base code install uninstall install-server google_csv
+.PHONY: all build buildinfojson clean clean-base wipe-base code install uninstall install-server google_csv
 
 # vim:set ft=make:
