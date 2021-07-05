@@ -35,7 +35,7 @@ build-stamp-l10n: $(L10N_FILES)
 buildinfojson:
 	repo=`git remote get-url origin | sed -e 's/\.git$$//' -e 's#.*[/\\]##'` ;\
 	rev=`git show --no-patch --format=%H` ;\
-	lastchanged=`git show --no-patch --format=%aI` ;\
+	lastchanged=`git show --no-patch --format=%ad --date=format:%Y-%m-%dT%T%z` ;\
 	builddate=`date +"%Y-%m-%dT%T%z"` ;\
 	echo '{' > build-info.json ;\
 	echo '  "repository": "'$$repo'",' >> build-info.json ;\
