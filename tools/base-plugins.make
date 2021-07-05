@@ -36,7 +36,7 @@ buildinfojson:
 	repo=`git remote get-url origin | sed -e 's/\.git$$//' -e 's#.*[/\\]##'` ;\
 	rev=`git show --no-patch --format=%H` ;\
 	lastchanged=`git show --no-patch --format=%aI` ;\
-	builddate=`date --iso-8601=seconds` ;\
+	builddate=`date +"%Y-%m-%dT%T%z"` ;\
 	echo '{' > build-info.json ;\
 	echo '  "repository": "'$$repo'",' >> build-info.json ;\
 	echo '  "rev": "'$$rev'",' >> build-info.json ;\
