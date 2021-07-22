@@ -13,6 +13,8 @@ L10N = build-stamp-l10n
 
 WEBFRONTEND_SASS ?= sass
 
+PLUGIN_PATH ?= $(PLUGIN_NAME)
+
 css: $(CSS)
 
 $(CSS): $(SCSS_FILES)
@@ -64,17 +66,17 @@ google_csv:
 
 install-server: ${INSTALL_FILES}
 	[ ! -z "${INSTALL_PREFIX}" ]
-	mkdir -p ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}
+	mkdir -p ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_PATH}
 	for f in ${INSTALL_FILES}; do \
-		mkdir -p ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}/`dirname $$f`; \
+		mkdir -p ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_PATH}/`dirname $$f`; \
 		if [ -d "$$f" ]; then \
-			cp -Pr $$f ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}/`dirname $$f`; \
+			cp -Pr $$f ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_PATH}/`dirname $$f`; \
 		else \
-			cp $$f ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}/$$f; \
+			cp $$f ${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_PATH}/$$f; \
 		fi; \
 	done
 	if [ -f "build-info.json" ]; then \
-		cp "build-info.json" "${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_NAME}/build-info.json"; \
+		cp "build-info.json" "${INSTALL_PREFIX}/server/base/plugins/${PLUGIN_PATH}/build-info.json"; \
 	fi
 
 clean-base:
