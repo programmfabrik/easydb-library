@@ -11,6 +11,8 @@ SCSS_FILES ?=
 
 CSS ?= $(WEB)/${PLUGIN_NAME}.scss
 
+PLUGIN_PATH ?= $(PLUGIN_NAME)
+
 export SASS_PATH=.
 scss_call = sass
 
@@ -46,13 +48,13 @@ uninstall:
 
 install-solution: ${INSTALL_FILES}
 	[ ! -z "${INSTALL_PREFIX}" ]
-	mkdir -p ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_NAME}
+	mkdir -p ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_PATH}
 	for f in ${INSTALL_FILES}; do \
-		mkdir -p ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_NAME}/`dirname $$f`; \
+		mkdir -p ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_PATH}/`dirname $$f`; \
 		if [ -d "$$f" ]; then \
-			cp -Pr $$f ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_NAME}/`dirname $$f`; \
+			cp -Pr $$f ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_PATH}/`dirname $$f`; \
 		else \
-			cp $$f ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_NAME}/$$f; \
+			cp $$f ${INSTALL_PREFIX}/solution-${SOLUTION}/solutions/${SOLUTION}/plugins/${PLUGIN_PATH}/$$f; \
 		fi; \
 	done
 
