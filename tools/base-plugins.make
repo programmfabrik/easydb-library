@@ -3,7 +3,7 @@ WEBHOOKS = build/webhooks
 
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
-L10N2JSON = python2 $(SELF_DIR)/l10n2json.py
+L10N2JSON = $(SELF_DIR)/l10n2json.py
 
 JS ?= $(WEB)/${PLUGIN_NAME}.js
 WEBHOOK_NAME ?= ${PLUGIN_NAME}

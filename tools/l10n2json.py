@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # coding=utf8
 import sys
 import csv
@@ -10,14 +10,14 @@ import json
 # print 'Argument List:', str(sys.argv)
 
 if len(sys.argv) < 3:
-    print "Usage: l10n2json.py <csv-files> <target-directory>"
+    print("Usage: l10n2json.py <csv-files> <target-directory>")
 
 directory = sys.argv[ len(sys.argv)-1 ]
 
 target_dict = {}
 
 if not os.path.exists(directory):
-    print "Target-Directory does not exists:", directory
+    print("Target-Directory does not exists:", directory)
     exit(1)
 
 cultures = []
@@ -37,16 +37,16 @@ def getCultureValue(_row, _culture, i = 0):
 
 
 for idx in range(1, len(sys.argv)-1):
-    print "#"+str(idx), sys.argv[idx]
+    print("#"+str(idx), sys.argv[idx])
 
-    with open(sys.argv[idx], 'rb') as csvfile:
+    with open(sys.argv[idx], 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
 
         for culture in reader.fieldnames:
             if culture == "key":
                 continue
             elif re.match("[a-z]{2}\-[A-Z]{2}", culture) == None:
-                print "Omitting column \""+culture+"\", culture format \"az-AZ\" not matching."
+                print("Omitting column \""+culture+"\", culture format \"az-AZ\" not matching.")
             else:
                 cultures.append({"code": culture})
                 cultures_plain.append(culture)
@@ -60,14 +60,14 @@ for idx in range(1, len(sys.argv)-1):
             if loca_key == None or loca_key == '':
                 continue
 
-            for culture in row.keys():
+            for culture in list(row.keys()):
                 if culture not in cultures_plain:
                     continue
 
                 if not culture in target_dict:
                     if culture == None:
-                        print
-                        print "WARNING: Line %s: Ignoring extra value: %s. Row:" % ((line+1), row[culture]), repr(row)
+                        print()
+                        print("WARNING: Line %s: Ignoring extra value: %s. Row:" % ((line+1), row[culture]), repr(row))
                         continue
 
                     target_dict[culture] = {}
@@ -75,7 +75,7 @@ for idx in range(1, len(sys.argv)-1):
                 target_dict[culture][loca_key] = getCultureValue(row, culture)
             line = line + 1
 
-for culture, loca_keys in target_dict.iteritems():
+for culture, loca_keys in target_dict.items():
     # we omit columns which don't look like "culture" columns
 
     filename = directory+"/"+culture+".json"
@@ -83,9 +83,9 @@ for culture, loca_keys in target_dict.iteritems():
         dump_dict = {}
         dump_dict[culture] = target_dict[culture]
         json.dump(dump_dict, outfile, ensure_ascii=False, sort_keys=True, indent=4)
-    print "Wrote", filename, "with", len(target_dict[culture].keys()), "loca keys."
+    print("Wrote", filename, "with", len(list(target_dict[culture].keys())), "loca keys.")
 
 filename = directory+"/cultures.json"
 with open(filename, 'w') as outfile:
     json.dump(cultures, outfile, ensure_ascii=False, sort_keys=True, indent=4)
-    print "Wrote", filename, "with", repr(cultures_plain)
+    print("Wrote", filename, "with", repr(cultures_plain))
