@@ -34,7 +34,7 @@ def call(config, script, parameters='', additional_nodepaths=[], logger=None):
         env=node_env
     )
 
-    out, err = p1.communicate(input=parameters)
+    out, err = p1.communicate(input=parameters.encode('utf-8'))
     exit_code = p1.returncode
 
     if logger is not None:
@@ -43,7 +43,7 @@ def call(config, script, parameters='', additional_nodepaths=[], logger=None):
         if (exit_code != 0):
             logger.error('noderunner call: exit code: %s, error: %s, out: %s' % (exit_code, err, out))
 
-    return unicode(out, encoding='utf-8'), unicode(err, encoding='utf-8'), exit_code
+    return out.decode('utf-8'), err.decode('utf-8'), exit_code
 
 
 def get_paths(config):
