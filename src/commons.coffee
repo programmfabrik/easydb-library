@@ -35,6 +35,8 @@ class CustomDataTypeWithCommons extends CustomDataType
   supportsStandard: ->
       true
 
+  supportsPrinting: ->
+      true
 
   supportsFacet: ->
       true
