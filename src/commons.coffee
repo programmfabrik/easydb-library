@@ -325,7 +325,6 @@ class CustomDataTypeWithCommons extends CustomDataType
   #######################################################################
   # is called, when record is being saved by user
   getSaveData: (data, save_data, opts) ->
-
     that = @
 
     if opts.demo_data
@@ -373,9 +372,6 @@ class CustomDataTypeWithCommons extends CustomDataType
             if cdata._standard?.text
               if cdata._standard?.text != ''
                 conceptStandard.text = cdata._standard.text
-        #else
-        #  conceptStandard.text = cdata.conceptName.trim() # (else easydb-error!)
-
 
 	       # save the frontend-language (display-purposes)
         frontendLanguages = ez5.loca.getLanguage()
@@ -399,11 +395,18 @@ class CustomDataTypeWithCommons extends CustomDataType
         # hierarchical ancestors
         if cdata?.conceptAncestors
           if cdata.conceptAncestors.length > 0
+            if Array.isArray cdata.conceptAncestors
+              cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
             save_data[@name()]['conceptAncestors'] = cdata.conceptAncestors
 
+        # conceptname choosen manually?
         if cdata?.conceptNameChosenByHand
           if cdata.conceptNameChosenByHand == true
             save_data[@name()]['conceptNameChosenByHand'] = true
+
+        # add facet if exists
+        if cdata?.facetTerm
+          save_data[@name()]['facetTerm'] = cdata.facetTerm
 
   #######################################################################
   # update result in Masterform
