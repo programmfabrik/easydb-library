@@ -158,6 +158,12 @@ class CustomDataTypeWithCommons extends CustomDataType
     that = @
     layout
 
+    classNameForBurgerMenuButton = 'pluginDirectSelectEditSearch'
+    if ez5.version("6")
+      classNameForBurgerMenuButton = 'pluginDirectSelectEditSearchFylr'
+    else if ez5.version("5")
+      classNameForBurgerMenuButton = 'pluginDirectSelectEditSearch'
+		
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: 'customPluginEditorLayout'
@@ -170,7 +176,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                   new CUI.Button
                     text: ''
                     icon: new CUI.Icon(class: "fa-ellipsis-v")
-                    class: 'pluginDirectSelectEditSearch'
+                    class: classNameForBurgerMenuButton
                     # show "dots"-menu on click on 3 vertical dots
                     onClick: (e, dotsButton) =>
                       dotsButtonMenu = new CUI.Menu
