@@ -163,7 +163,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       classNameForBurgerMenuButton = 'pluginDirectSelectEditSearchFylr'
     else if ez5.version("5")
       classNameForBurgerMenuButton = 'pluginDirectSelectEditSearch'
-		
+
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: 'customPluginEditorLayout'
@@ -208,7 +208,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                                   hide_ms: 200
                                   content: (tooltip) ->
                                     if !that.isEmpty(data, 0, 0)
-                                      # get jskos-details-data
+                                      # get details-data
                                       encodedURI = encodeURIComponent(cdata.conceptURI)
                                       extendedInfo_xhr = { "xhr" : undefined }
                                       that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
@@ -398,12 +398,18 @@ class CustomDataTypeWithCommons extends CustomDataType
           _fulltext: conceptFulltext
           _standard: conceptStandard
 
-        # hierarchical ancestors
+        # hierarchical ancestors given?
         if cdata?.conceptAncestors
           if cdata.conceptAncestors.length > 0
             if Array.isArray cdata.conceptAncestors
               cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
             save_data[@name()]['conceptAncestors'] = cdata.conceptAncestors
+
+        # conceptSource set?
+        if cdata?.conceptSource
+          if typeof cdata.conceptSource == 'string'
+            if cdata.conceptSource.length > 0
+              save_data[@name()]['conceptSource'] = cdata.conceptSource
 
         # conceptname choosen manually?
         if cdata?.conceptNameChosenByHand
