@@ -455,7 +455,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                 markdown: true
                 placement: 'w'
                 content: (tooltip) ->
-                  # get jskos-details-data
+                  # get details-data
                   encodedURI = encodeURIComponent(cdata.conceptURI)
                   extendedInfo_xhr = { "xhr" : undefined }
                   if typeof that.__getAdditionalTooltipInfo == "function"
