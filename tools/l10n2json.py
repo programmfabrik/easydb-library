@@ -43,7 +43,7 @@ for idx in range(1, len(sys.argv)-1):
         reader = csv.DictReader(csvfile, delimiter=',', quotechar='"')
 
         for culture in reader.fieldnames:
-            if culture == "key":
+            if culture in ("key", "R"):
                 continue
             elif re.match("[a-z]{2}\-[A-Z]{2}", culture) == None:
                 print("Omitting column \""+culture+"\", culture format \"az-AZ\" not matching.")
