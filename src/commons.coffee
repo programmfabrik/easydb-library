@@ -5,7 +5,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   # init data
   initData: (data) ->
       if not data[@name()]
-          cdata = {}
+          cdata = null
           data[@name()] = cdata
       else
           cdata = data[@name()]
@@ -269,7 +269,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       instance: that
       node: layout
       call: =>
-        cdata = {}
+        cdata = null
         data[that.name()] = cdata
         opts.deleteDataFromPlugin = true
         that.__updateResult(cdata, layout, opts)
