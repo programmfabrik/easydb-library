@@ -142,7 +142,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   # handle editorinput
   renderEditorInput: (data, top_level_data, opts) ->
 
-    name = @name()
+    name = @name(opts)
     if not data[name]
       data[name] = {
             conceptName : ''
@@ -198,7 +198,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               text: $$('custom.data.type.commons.controls.detailinfo.label')
                               value: 'detail'
                               icon_left: new CUI.Icon(class: "fa-info-circle")
-                              disabled: that.isEmpty(data, 0, 0)
+                              disabled: that.isEmpty(data, 0, opts)
                               onClick: (eDetailInfo, btnDetailInfo) ->
                                 tooltip = new CUI.Tooltip
                                   element: btnDetailInfo
@@ -207,7 +207,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                                   show_ms: 1000
                                   hide_ms: 200
                                   content: (tooltip) ->
-                                    if !that.isEmpty(data, 0, 0)
+                                    if !that.isEmpty(data, 0, opts)
                                       # get details-data
                                       encodedURI = encodeURIComponent(cdata.conceptURI)
                                       extendedInfo_xhr = { "xhr" : undefined }
@@ -230,7 +230,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               text: $$('custom.data.type.commons.controls.calluri.label')
                               value: 'uri'
                               icon_left: new CUI.Icon(class: "fa-external-link")
-                              disabled: that.isEmpty(data, 0, 0) || ! CUI.parseLocation(cdata.conceptURI)
+                              disabled: that.isEmpty(data, 0, opts) || ! CUI.parseLocation(cdata.conceptURI)
                               onClick: ->
                                 window.open cdata.conceptURI, "_blank"
                                 dotsButtonMenu.hide()
@@ -242,13 +242,13 @@ class CustomDataTypeWithCommons extends CustomDataType
                               name: 'deleteValueFromDANTEPlugin'
                               class: 'deleteValueFromDANTEPlugin'
                               icon_left: new CUI.Icon(class: "fa-trash")
-                              disabled: that.isEmpty(data, 0, 0)
+                              disabled: that.isEmpty(data, 0, opts)
                               onClick: ->
                                 cdata = {
                                     conceptName : ''
                                     conceptURI : ''
                                 }
-                                data[that.name()] = cdata
+                                data[that.name(opts)] = cdata
                                 that.__updateResult(cdata, layout, opts)
                                 dotsButtonMenu.hide()
                           menu_items.push deleteClear
@@ -270,10 +270,14 @@ class CustomDataTypeWithCommons extends CustomDataType
       node: layout
       call: =>
         cdata = null
-        data[that.name()] = cdata
+        data[that.name(opts)] = cdata
         opts.deleteDataFromPlugin = true
         that.__updateResult(cdata, layout, opts)
+
     @__updateResult(cdata, layout, opts)
+
+    opts.initialcallfrompoolmanager = false
+
     layout
 
 
@@ -321,12 +325,12 @@ class CustomDataTypeWithCommons extends CustomDataType
   isEmpty: (data, top_level_data, opts={}) ->
       if opts?.mode == "expert"
           # check input in expert search
-          if typeof data[@name()] == 'object'
-            return CUI.util.isEmpty(data[@name()]?)
+          if typeof data[@name(opts)] == 'object'
+            return CUI.util.isEmpty(data[@name(opts)]?)
           else
-            return CUI.util.isEmpty(data[@name()]?.trim())
+            return CUI.util.isEmpty(data[@name(opts)]?.trim())
 
-      return not data[@name()]?.conceptName
+      return not data[@name(opts)]?.conceptName
 
   #######################################################################
   # is called, when record is being saved by user
@@ -339,16 +343,16 @@ class CustomDataTypeWithCommons extends CustomDataType
         conceptURI : 'https://example.com'
       }
 
-    cdata = data[@name()] or data._template?[@name()]
+    cdata = data[@name(opts)] or data._template?[@name(opts)]
     switch @getDataStatus(cdata)
       when "invalid"
         if opts.copy
-            save_data[@name()] = null
+            save_data[@name(opts)] = null
         else
             throw new InvalidSaveDataException()
 
       when "empty"
-        save_data[@name()] = null
+        save_data[@name(opts)] = null
 
       when "ok"
 
@@ -391,7 +395,7 @@ class CustomDataTypeWithCommons extends CustomDataType
             conceptNameChosenByHand = true
 
         # build savedata
-        save_data[@name()] =
+        save_data[@name(opts)] =
           conceptName: cdata.conceptName.trim()
           conceptURI: cdata.conceptURI.trim()
           frontendLanguage: frontendLanguage
@@ -403,22 +407,22 @@ class CustomDataTypeWithCommons extends CustomDataType
           if cdata.conceptAncestors.length > 0
             if Array.isArray cdata.conceptAncestors
               cdata.conceptAncestors = cdata.conceptAncestors.join(' ')
-            save_data[@name()]['conceptAncestors'] = cdata.conceptAncestors
+            save_data[@name(opts)]['conceptAncestors'] = cdata.conceptAncestors
 
         # conceptSource set?
         if cdata?.conceptSource
           if typeof cdata.conceptSource == 'string'
             if cdata.conceptSource.length > 0
-              save_data[@name()]['conceptSource'] = cdata.conceptSource
+              save_data[@name(opts)]['conceptSource'] = cdata.conceptSource
 
         # conceptname choosen manually?
         if cdata?.conceptNameChosenByHand
           if cdata.conceptNameChosenByHand == true
-            save_data[@name()]['conceptNameChosenByHand'] = true
+            save_data[@name(opts)]['conceptNameChosenByHand'] = true
 
         # add facet if exists
         if cdata?.facetTerm
-          save_data[@name()]['facetTerm'] = cdata.facetTerm
+          save_data[@name(opts)]['facetTerm'] = cdata.facetTerm
 
   #######################################################################
   # update result in Masterform
@@ -485,9 +489,18 @@ class CustomDataTypeWithCommons extends CustomDataType
                     searchstring = input.getValueForInput()
                     if typeof that.__updateSuggestionsMenu == "function"
                       @__updateSuggestionsMenu(cdata, 0, searchstring, input, suggest_Menu_directInput, searchsuggest_xhr, layout, opts)
-      # if not called from poolmanagerplugin
+
+      # if not called from poolmanagerplugin the first time
+      #   (otherwise "already rendered", because DataFieldProxy renders it again)
+      rendered = false
       if ! opts?.callfrompoolmanager
+        rendered = true
         inputX.render()
+
+      if opts.initialcallfrompoolmanager == false && rendered == false
+        inputX.render()
+
+      opts.initialcallfrompoolmanager = false
 
       # init suggestmenu
       suggest_Menu_directInput = new CUI.Menu
@@ -532,7 +545,7 @@ class CustomDataTypeWithCommons extends CustomDataType
   #######################################################################
   # renders details-output of record
   renderDetailOutput: (data, top_level_data, opts) ->
-    @__renderButtonByData(data[@name()])
+    @__renderButtonByData(data[@name(opts)])
 
 
   #######################################################################
