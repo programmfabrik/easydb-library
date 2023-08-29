@@ -269,7 +269,8 @@ class CustomDataTypeWithCommons extends CustomDataType
       instance: that
       node: layout
       call: =>
-        cdata = null
+        for key of cdata
+          delete cdata[key]
         data[that.name(opts)] = cdata
         opts.deleteDataFromPlugin = true
         that.__updateResult(cdata, layout, opts)
