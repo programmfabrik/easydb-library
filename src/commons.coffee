@@ -154,9 +154,10 @@ class CustomDataTypeWithCommons extends CustomDataType
 
   #######################################################################
   # buttons, which opens and closes popover+menu
-  __renderEditorInputPopover: (data, cdata, opts={}) ->
+  __renderEditorInputPopover: (data, cdata, opts = {}, customButtonBarEntrys = false) ->
     that = @
-    layout
+    @.dotsButtonMenu = {}
+    layout = {}
 
     classNameForBurgerMenuButton = 'pluginDirectSelectEditSearch'
     if ez5.version("6")
@@ -179,7 +180,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                     class: classNameForBurgerMenuButton
                     # show "dots"-menu on click on 3 vertical dots
                     onClick: (e, dotsButton) =>
-                      dotsButtonMenu = new CUI.Menu
+                      that.dotsButtonMenu = new CUI.Menu
                           class: "customDataTypeCommonsMenu"
                           element : dotsButton
                           menu_items = [
@@ -189,7 +190,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               icon_left: new CUI.Icon(class: "fa-search")
                               onClick: (e2, btn2) ->
                                 that.showEditPopover(dotsButton, data, cdata, layout, opts)
-                                dotsButtonMenu.hide()
+                                that.dotsButtonMenu.hide()
                           ]
 
                           if typeof that.__getAdditionalTooltipInfo == "function"
@@ -222,7 +223,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                                   node: btnDetailInfo
                                   only_once: true
                                   call: (ev) =>
-                                    dotsButtonMenu.hide()
+                                    that.dotsButtonMenu.hide()
 
                             menu_items.push detailinfo
                           uriCall =
@@ -233,7 +234,7 @@ class CustomDataTypeWithCommons extends CustomDataType
                               disabled: that.isEmpty(data, 0, opts) || ! CUI.parseLocation(cdata.conceptURI)
                               onClick: ->
                                 window.open cdata.conceptURI, "_blank"
-                                dotsButtonMenu.hide()
+                                that.dotsButtonMenu.hide()
                           menu_items.push uriCall
                           deleteClear =
                               #delete / clear
@@ -250,14 +251,22 @@ class CustomDataTypeWithCommons extends CustomDataType
                                 }
                                 data[that.name(opts)] = cdata
                                 that.__updateResult(cdata, layout, opts)
-                                dotsButtonMenu.hide()
+                                that.dotsButtonMenu.hide()
                           menu_items.push deleteClear
+
+                          # add custom buttons, if given
+                          if customButtonBarEntrys?.length > 0
+                            menu_items.push customButtonBarEntrys...
+
                           itemList =
                             items: menu_items
-                      dotsButtonMenu._auto_close_after_click = false
-                      dotsButtonMenu.setItemList(itemList)
-                      dotsButtonMenu.show()
+                      that.dotsButtonMenu._auto_close_after_click = false
+                      that.dotsButtonMenu.setItemList(itemList)
+                      that.dotsButtonMenu.show()
                 ]
+
+    # present the layout upwards for possible cases
+    @.layout = layout
 
     # other plugins can trigger layout-rebuild by deletion of data-value
     CUI.Events.registerEvent
