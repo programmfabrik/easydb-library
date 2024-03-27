@@ -617,3 +617,13 @@ class CustomDataTypeCommonFacet extends FieldFacet
       fields: [ @_field.fullName()+".conceptName" ]
       type: "in"
       in: [ obj.term ]
+
+  # Let the frontend sort the facets, there are facets that could not be sorted by the backend
+  # This can be overridden by the plugin to sort the objects in a different way
+  getObjectsSorted: () ->
+    objects = super()
+    # If the facet is sorted by term (name), we are going to sort the objects by the localized name
+    if @getSortSetting() == "term" and objects?.length > 1
+      objects.sort (a, b) =>
+        @renderObjectText(a).localeCompare(@renderObjectText(b))
+    return objects
