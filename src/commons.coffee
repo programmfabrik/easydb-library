@@ -392,6 +392,9 @@ class CustomDataTypeWithCommons extends CustomDataType
             if cdata._standard?.text
               if cdata._standard?.text != ''
                 conceptStandard.text = cdata._standard.text
+          if cdata._standard?.geo
+            if cdata._standard.geo
+              conceptStandard.geo = cdata._standard.geo 
 
 	       # save the frontend-language (display-purposes)
         frontendLanguages = ez5.loca.getLanguage()
