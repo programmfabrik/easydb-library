@@ -425,6 +425,12 @@ class CustomDataTypeWithCommons extends CustomDataType
             if cdata.conceptSource.length > 0
               save_data[@name(opts)]['conceptSource'] = cdata.conceptSource
 
+        # conceptGeoJSON set?
+        if cdata?.conceptGeoJSON
+          if typeof cdata.conceptGeoJSON == 'object'
+            if Object.keys(cdata.conceptGeoJSON).length > 0
+              save_data[@name(opts)]['conceptGeoJSON'] = cdata.conceptGeoJSON
+				
         # conceptname choosen manually?
         if cdata?.conceptNameChosenByHand
           if cdata.conceptNameChosenByHand == true
