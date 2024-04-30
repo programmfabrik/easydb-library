@@ -164,7 +164,7 @@ class CustomDataTypeWithCommons extends CustomDataType
       classNameForBurgerMenuButton = 'pluginDirectSelectEditSearchFylr'
     else if ez5.version("5")
       classNameForBurgerMenuButton = 'pluginDirectSelectEditSearch'
-
+            
     # build layout for editor
     layout = new CUI.HorizontalLayout
         class: 'customPluginEditorLayout'
@@ -449,6 +449,12 @@ class CustomDataTypeWithCommons extends CustomDataType
     that = @
     if opts.data
       opts.data[that.name(opts)] = cdata
+        
+    # check if display-layout should be oneline
+    onelineDisplay = false
+    if @FieldSchema?.custom_settings?.editor_display?.value == 'condensed' || opts?.custom_settings?.editor_display?.value == 'condensed'
+      onelineDisplay = true
+    
     # if field is not empty
     if cdata?.conceptURI
       # die uuid einkürzen..
@@ -459,15 +465,52 @@ class CustomDataTypeWithCommons extends CustomDataType
       if displayURI.length > 30
         displayURI = displayURI.replace('uri.gbv.de/terminology/', '…/')
 
-
-      info = new CUI.VerticalLayout
-        class: 'ez5-info_commonPlugin'
-        top:
-          content:
+      # default display
+      topContent = 
+          content: 
               new CUI.Label
                 text: cdata.conceptName
-                multiline: true
-        bottom:
+                multiline: true  
+                
+      # condensed display
+      if onelineDisplay && typeof that.__getAdditionalTooltipInfo == "function"
+         topContent = 
+             content: 
+                # output Button with Name of picked dante-Entry and URI
+                new CUI.HorizontalLayout
+                  maximize: true
+                  left:
+                    content:
+                      new CUI.Label
+                        centered: false
+                        text: cdata.conceptName
+                        multiline: true  
+                  center:
+                    content:
+                      new CUI.ButtonHref
+                        name: "outputButtonHref"
+                        class: "pluginResultButton"
+                        appearance: "link"
+                        size: "normal"
+                        href: cdata.conceptURI
+                        target: "_blank"
+                        tooltip:
+                          markdown: true
+                          placement: 'nw'
+                          content: (tooltip) ->
+                            extendedInfo_xhr = { "xhr" : undefined }
+                            # get jskos-details-data
+                            encodedURI = encodeURIComponent(cdata.conceptURI)
+                            that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
+                            # loader, until details are xhred
+                            new CUI.Label(icon: "spinner")
+                  right: null
+        
+      info = new CUI.VerticalLayout
+        class: 'ez5-info_commonPlugin'
+        top: topContent
+
+        bottom: if ! onelineDisplay
           content:
             new CUI.Button
               name: "outputButtonHref"
