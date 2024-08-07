@@ -407,6 +407,12 @@ class CustomDataTypeWithCommons extends CustomDataType
           if cdata.conceptNameChosenByHand == true
             conceptNameChosenByHand = true
 
+        # save the eventually applied hierarchie
+        conceptNameWithHierarchie = false
+        if cdata?.conceptNameWithHierarchie
+          if cdata.conceptNameWithHierarchie == true
+            conceptNameWithHierarchie = true
+            
         # build savedata
         save_data[@name(opts)] =
           conceptName: cdata.conceptName.trim()
@@ -439,6 +445,11 @@ class CustomDataTypeWithCommons extends CustomDataType
           if cdata.conceptNameChosenByHand == true
             save_data[@name(opts)]['conceptNameChosenByHand'] = true
 
+        # conceptname with applied hierarchie
+        if cdata?.conceptNameWithHierarchie
+          if cdata.conceptNameWithHierarchie == true
+            save_data[@name(opts)]['conceptNameWithHierarchie'] = true
+            
         # add facet if exists
         if cdata?.facetTerm
           save_data[@name(opts)]['facetTerm'] = cdata.facetTerm
