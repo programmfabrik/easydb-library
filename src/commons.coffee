@@ -485,38 +485,37 @@ class CustomDataTypeWithCommons extends CustomDataType
                 
       # condensed display
       if onelineDisplay && typeof that.__getAdditionalTooltipInfo == "function"
+         onelineButtonbar =  new CUI.Buttonbar
+                                  buttons: [
+                                        new CUI.Label
+                                          centered: false
+                                          text: cdata.conceptName
+                                          multiline: true  
+
+                                        new CUI.ButtonHref
+                                          name: "outputButtonHref"
+                                          class: "pluginResultButton"
+                                          appearance: "link"
+                                          size: "normal"
+                                          href: cdata.conceptURI
+                                          target: "_blank"
+                                          tooltip:
+                                            markdown: true
+                                            placement: 'nw'
+                                            content: (tooltip) ->
+                                              extendedInfo_xhr = { "xhr" : undefined }
+                                              # get jskos-details-data
+                                              encodedURI = encodeURIComponent(cdata.conceptURI)
+                                              that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
+                                              # loader, until details are xhred
+                                              new CUI.Label(icon: "spinner")
+                                  ]
+         onelineButtonbar.DOM.style.maxWidth = '92%'
          topContent = 
              content: 
                 # output Button with Name of picked dante-Entry and URI
-                new CUI.HorizontalLayout
-                  maximize: true
-                  left:
-                    content:
-                      new CUI.Label
-                        centered: false
-                        text: cdata.conceptName
-                        multiline: true  
-                  center:
-                    content:
-                      new CUI.ButtonHref
-                        name: "outputButtonHref"
-                        class: "pluginResultButton"
-                        appearance: "link"
-                        size: "normal"
-                        href: cdata.conceptURI
-                        target: "_blank"
-                        tooltip:
-                          markdown: true
-                          placement: 'nw'
-                          content: (tooltip) ->
-                            extendedInfo_xhr = { "xhr" : undefined }
-                            # get jskos-details-data
-                            encodedURI = encodeURIComponent(cdata.conceptURI)
-                            that.__getAdditionalTooltipInfo(encodedURI, tooltip, extendedInfo_xhr)
-                            # loader, until details are xhred
-                            new CUI.Label(icon: "spinner")
-                  right: null
-        
+                onelineButtonbar
+
       info = new CUI.VerticalLayout
         class: 'ez5-info_commonPlugin'
         top: topContent
