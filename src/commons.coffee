@@ -680,7 +680,8 @@ class CustomDataTypeCommonFacet extends FieldFacet
       type: "in"
       in: [ obj.term ]
 
-  # Let the frontend sort the facets, there are facets that could not be sorted by the backend
-  # This can be overridden by the plugin to sort the objects in a different way
-  getObjectsSorted: () ->
-    return super()
+  getObjectsSorted: (objects) -> 
+    return super(objects)
+
+  __isAndButtonAvailable: ->
+    return @_field.insideNested()
