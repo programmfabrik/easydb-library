@@ -1,19 +1,21 @@
-# these common classes + methods are used by the plugins, developed by the vzg: gnd, geonames, gn250, gvk, georef, dante, getty, tna_discovery
+# these common class is used by many custom-data-type-plugins
 
 class CustomDataTypeWithCommons extends CustomDataType
 
   # init data
   initData: (data) ->
+
       if not data[@name()]
           cdata = null
           data[@name()] = cdata
       else
           cdata = data[@name()]
 
-      if not cdata.url
-          cdata.url = ""
+      # add the template data, if we have any
+      if data._template?[@name()]
+        cdata._template = data._template[@name()]
 
-      cdata
+      cdata     
 
   renderFieldAsGroup: ->
     return false
@@ -346,14 +348,15 @@ class CustomDataTypeWithCommons extends CustomDataType
   # is called, when record is being saved by user
   getSaveData: (data, save_data, opts) ->
     that = @
-
     if opts.demo_data
       return {
         conceptName : 'Example'
         conceptURI : 'https://example.com'
       }
 
+    template_data = data._template?[@name()]
     cdata = data[@name(opts)] or data._template?[@name(opts)]
+
     switch @getDataStatus(cdata)
       when "invalid"
         if opts.copy
@@ -362,10 +365,15 @@ class CustomDataTypeWithCommons extends CustomDataType
             throw new InvalidSaveDataException()
 
       when "empty"
-        save_data[@name(opts)] = null
+        # if _template is set, save it
+        if template_data and @getDataStatus(template_data) == "ok"
+          save_data[@name()] = template_data
+          data[@name(opts)] = template_data
+        else
+          # if no template data is given, set it to null
+          save_data[@name()] = null
 
       when "ok"
-
         # if _fulltext is already set, leave it, else set conceptName
         conceptFulltext = {}
         if cdata?._fulltext
