@@ -5,3 +5,4 @@ custom.data.type.commons.controls.search.label,Suchen,Search
 custom.data.type.commons.controls.detailinfo.label,Detailinfo, Details
 custom.data.type.commons.controls.calluri.label,Uri aufrufen,Call URI
 custom.data.type.commons.controls.delete.label,Löschen,Delete
+custom.data.type.commons.invalid_entry,Ungültiger Eintrag,Invalid entry

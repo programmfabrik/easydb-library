@@ -639,6 +639,15 @@ class CustomDataTypeWithCommons extends CustomDataType
           return "invalid"
       return "empty"
 
+  #######################################################################
+  # this method is used by the editor to check the fields for validation and creating the "Errors"
+  checkValue:  (data, top_level_data, opts) ->
+    cdata = data[@name()]
+    switch @getDataStatus(cdata)
+      when "invalid"
+        return $$("custom.data.type.commons.invalid_entry")
+    return true
+
 
   #######################################################################
   # zeige die gewählten Optionen im Datenmodell unter dem Button an
