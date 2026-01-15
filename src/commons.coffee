@@ -697,8 +697,21 @@ class CustomDataTypeCommonFacet extends FieldFacet
       type: "in"
       in: [ obj.term ]
 
-  getObjectsSorted: (objects) -> 
-    return super(objects)
+  getObjectsSorted: (objects) ->
+    if (!objects?)
+      objects = this.getObjects();
+    if(objects?)
+      getSortValue = (obj) =>
+        sortKey = @getSortSetting()
+        if sortKey == 'term'
+          return obj[sortKey].toUpperCase()
+        else
+          return obj[sortKey]
+      sortDir = if @getSortOrderSetting() == 'ASC' then 1 else -1
+      return objects.sort (a, b) ->
+
+        return if getSortValue(a) >= getSortValue(b) then 1 * sortDir else -1 * sortDir
+    return null
 
   __isAndButtonAvailable: ->
     return @_field.insideNested()
